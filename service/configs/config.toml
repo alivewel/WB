@@ -1,0 +1,4 @@
+user = "postgres"
+dbname = "postgres"
+password = "1"
+sslmode = "disable"
