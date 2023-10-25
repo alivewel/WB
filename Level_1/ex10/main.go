@@ -4,14 +4,13 @@ import "fmt"
 
 func main() {
 	nums := []float32{-25.4, -27.0, 13.0, 19.0, 15.5, 24.5, -21.0, 32.5}
-	a := -25.4
-	set := make(map[int]float32)
+	set := make(map[int][]float32)
 
-	for _, element := range elements {
-		set[element]++
+	for _, num := range nums {
+		cur := int(num) / 10 * 10
+		set[cur] = append(set[cur], num)
 	}
-	b := int(a) / 10 * 10
-	fmt.Println(b)
+	fmt.Println(set)
 }
 
 // Дана последовательность температурных колебаний:
