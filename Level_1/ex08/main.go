@@ -5,6 +5,9 @@ import (
 	"fmt"
 )
 
+// первый бит имеет индекс 0
+// последний бит имеет индекс 63
+
 func getBit(num int64, index int) (int, error) {
 	if index < 0 || index > 63 {
 		return 0, errors.New("Invalid index. Index must be in the range [0, 63].")
@@ -22,7 +25,7 @@ func setBit(num *int64, index int, bit int) error {
 	if bit != 1 && bit != 0 {
 		return errors.New("Invalid bit value. Bit must be 0 or 1.")
 	}
-	if index < 0 || index > 64 {
+	if index < 0 || index > 63 {
 		return errors.New("Invalid index. Index must be in the range [0, 63].")
 	}
 	if bit == 1 {
@@ -54,7 +57,7 @@ func main() {
 	// 	printBits(num)
 	// }
 	var num1 int64 = 9223372036854775807
-	err := setBit(&num1, 64, 0)
+	err := setBit(&num1, 63, 1)
 	if err != nil {
 		fmt.Println("Ошибка:", err)
 	}
