@@ -36,7 +36,6 @@ func intersec2(set1, set2 map[int]struct{}) map[int]struct{} {
 	for elem := range set1 {
 		// проверка, существует ли element во втором множестве set2
 		_, ok := set2[elem]
-		// If the key exists
 		if ok {
 			result[elem] = struct{}{}
 		}

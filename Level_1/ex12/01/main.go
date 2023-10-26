@@ -12,7 +12,13 @@ func main() {
 	}
 
 	// Вывод множества с повторами и их количеством
+	// for element, count := range set {
+	// 	fmt.Printf("%s: %d\n", element, count)
+	// }
+
 	for element, count := range set {
-		fmt.Printf("%s: %d\n", element, count)
+		for i := 0; i < count; i++ {
+			fmt.Println(element)
+		}
 	}
 }
