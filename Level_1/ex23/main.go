@@ -1,6 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
+
+func removeElemStr(slice interface{}) interface{} {
+	sliceType := reflect.TypeOf(slice)
+	newSlice := reflect.New(sliceType).Elem()
+	return newSlice.Interface()
+}
 
 func main() {
 	a := []int{1, 2, 3, 4, 5, 6, 7}
