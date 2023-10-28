@@ -1,10 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func checkString(str string) bool {
+	lowStr := strings.ToLower(str)
 	checkMap := make(map[rune]struct{})
-	for _, elem := range str {
+	for _, elem := range lowStr {
 		_, ok := checkMap[elem]
 		if ok {
 			return false
@@ -15,7 +19,7 @@ func checkString(str string) bool {
 }
 
 func main() {
-	str := "abcda"
+	str := "abcdA"
 	result := checkString(str)
 	fmt.Println(result)
 }
