@@ -8,7 +8,7 @@ func createNum(c1 chan int, arrayInt []int) {
 	for i := 0; i < len(arrayInt); i++ {
 		c1 <- arrayInt[i]
 	}
-	close(c1) // close channel
+	close(c1)
 }
 
 func squares(c1, c2 chan int, arrayInt []int) {
@@ -16,28 +16,24 @@ func squares(c1, c2 chan int, arrayInt []int) {
 		res := <-c1
 		c2 <- res * res
 	}
-	close(c2) // close channel
+	close(c2)
 }
 
 func main() {
-	fmt.Println("main() started")
-	c1 := make(chan int)
-	c2 := make(chan int)
 	arrayInt := []int{5, 1, 3, 9, 4, 6}
-	go createNum(c1, arrayInt) // start goroutine
+	c1 := make(chan int, len(arrayInt))
+	c2 := make(chan int, len(arrayInt))
+	go createNum(c1, arrayInt)
 
 	go squares(c1, c2, arrayInt)
 
 	for {
 		val, ok := <-c2
 		if ok == false {
-			fmt.Println(val, ok, "<-- loop broke!")
-			break // exit break loop
+			break
 		} else {
-			fmt.Println(val, ok)
+			fmt.Println(val)
 		}
 	}
 
-
-	fmt.Println("main() stopped")
 }
