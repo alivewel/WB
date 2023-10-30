@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# создание go.mod файлов
 for i in {11..26}; do
     folder_name="ex$i"
     cd "$folder_name" || exit

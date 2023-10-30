@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# копирование файла main.go
+
 source_folder="ex11"
 
 for i in {12..26}; do
