@@ -12,7 +12,7 @@ func calculateSquareSum(numbers []int, resultChan chan int) {
 
 func main() {
 	numbers := []int{2, 4, 6, 8, 10}
-	numGoroutines := 2 // Количество горутин для вычислений
+	numGoroutines := 2
 
 	resultChan := make(chan int)
 
