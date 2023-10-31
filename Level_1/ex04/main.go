@@ -16,7 +16,7 @@ func worker(id int, wg *sync.WaitGroup, dataChan <-chan int) {
 
 	for data := range dataChan {
 		fmt.Printf("Worker %d received: %d\n", id, data)
-		time.Sleep(time.Second) // Добавляем задержку в 1 секунду
+		time.Sleep(time.Second)
 	}
 }
 
@@ -31,7 +31,6 @@ func main() {
 	dataChan := make(chan int)
 	var wg sync.WaitGroup
 
-	// Запускаем воркеров
 	for i := 1; i <= *numWorkers; i++ {
 		wg.Add(1)
 		go worker(i, &wg, dataChan)
@@ -46,14 +45,13 @@ func main() {
 		close(dataChan) // Закрываем канал при получении сигнала
 	}()
 
-	// Записываем произвольные данные в канал (главный поток)
 	for i := 1; i <= 10; i++ {
 		dataChan <- i
 	}
 
-	close(dataChan) // Закрываем канал после завершения записи данных
+	close(dataChan)
 
-	wg.Wait() // Ожидаем завершения всех воркеров
+	wg.Wait()
 
 	fmt.Println("Main goroutine stopped")
 }
