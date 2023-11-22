@@ -8,6 +8,7 @@ type Location interface {
 
 type Home struct {
 	action string
+	want   string
 }
 
 func (h *Home) accept(v Visitor) {
@@ -15,11 +16,14 @@ func (h *Home) accept(v Visitor) {
 }
 
 func newHome() *Home {
-	return &Home{action: "Sleep"}
+	return &Home{
+		action: "Go to sleep",
+		want:   "Want to go home"}
 }
 
 type Work struct {
 	action string
+	want   string
 }
 
 func (w *Work) accept(v Visitor) {
@@ -27,11 +31,14 @@ func (w *Work) accept(v Visitor) {
 }
 
 func newWork() *Work {
-	return &Work{action: "Do tasks"}
+	return &Work{
+		action: "Do tasks",
+		want:   "Want to receive money"}
 }
 
 type School struct {
 	action string
+	want   string
 }
 
 func (s *School) accept(v Visitor) {
@@ -39,7 +46,9 @@ func (s *School) accept(v Visitor) {
 }
 
 func newSchool() *School {
-	return &School{action: "Study"}
+	return &School{
+		action: "Starting to study",
+		want:   "Want to know more"}
 }
 
 type Visitor interface {
@@ -48,26 +57,50 @@ type Visitor interface {
 	visitSchool(*School)
 }
 
-type VisitHome struct{}
+type VisitorAction struct{}
 
-func (v *VisitHome) visitHome(h *Home) {
+func (v *VisitorAction) visitHome(h *Home) {
 	fmt.Println(h.action)
 }
 
-type VisitWork struct{}
-
-func (v *VisitHome) visitWork(w *Work) {
+func (v *VisitorAction) visitWork(w *Work) {
 	fmt.Println(w.action)
 }
 
-type VisitSchool struct{}
-
-func (v *VisitHome) visitSchool(s *School) {
+func (v *VisitorAction) visitSchool(s *School) {
 	fmt.Println(s.action)
 }
 
-func main() {
+type VisitorWant struct{}
 
+func (v *VisitorWant) visitHome(h *Home) {
+	fmt.Println(h.want)
+}
+
+func (v *VisitorWant) visitWork(w *Work) {
+	fmt.Println(w.want)
+}
+
+func (v *VisitorWant) visitSchool(s *School) {
+	fmt.Println(s.want)
+}
+
+func main() {
+	home := newHome()
+	work := newWork()
+	school := newSchool()
+
+	visitorAction := VisitorAction{}
+
+	visitorAction.visitHome(home)
+	visitorAction.visitWork(work)
+	visitorAction.visitSchool(school)
+
+	visitorWant := VisitorWant{}
+
+	visitorWant.visitHome(home)
+	visitorWant.visitWork(work)
+	visitorWant.visitSchool(school)
 }
 
 // Команда для запуска:
