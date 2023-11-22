@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type House struct {
 	TypeHouse  string
 	Color      string
@@ -69,11 +71,11 @@ func NerDirector(b Builder) *Director {
 	return &Director{builder: b}
 }
 
-func (d *Director) SetBuilder(builder Builder) {
-	d.builder = builder
+func (d *Director) SetBuilder(b Builder) {
+	d.builder = b
 }
 
-func (d *Director) CreateBuilder() Builder {
+func (d *Director) BuildHouse() House {
 	d.builder.SetTypeHouse()
 	d.builder.SetColor()
 	d.builder.SetCountFloor()
@@ -83,7 +85,14 @@ func (d *Director) CreateBuilder() Builder {
 func main() {
 	woodHouseBuilder := WoodHouseBuilder{}
 	brickHouseBuilder := BrickHouseBuilder{}
+
 	director := NerDirector(&woodHouseBuilder)
+	woodHouse := director.BuildHouse()
+	fmt.Println("Wood house:", woodHouse)
+
+	director.SetBuilder(&brickHouseBuilder)
+	brickHouse := director.BuildHouse()
+	fmt.Println("Brick house:", brickHouse)
 }
 
 // Команда для запуска:
