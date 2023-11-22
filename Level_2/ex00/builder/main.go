@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type House struct {
 	TypeHouse  string
 	Color      string
@@ -9,10 +7,10 @@ type House struct {
 }
 
 type Builder interface {
-	SetTypeHouse() Builder
-	SetColor() Builder
-	SetCountFloor() Builder
-	BuildHouse() Builder
+	SetTypeHouse()
+	SetColor()
+	SetCountFloor()
+	BuildHouse() House
 }
 
 type WoodHouseBuilder struct {
