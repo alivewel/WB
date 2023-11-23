@@ -51,6 +51,10 @@ func (r *Revolver) incrementPatron() {
 	}
 }
 
+func (r *Revolver) getPatronCount() int {
+	return r.patronCount
+}
+
 type State interface {
 	charge() error
 	shoot() error
@@ -62,7 +66,13 @@ type StateChargedRevolver struct {
 }
 
 func (s *StateChargedRevolver) charge() error {
-	return fmt.Errorf("The revolver is already loaded!")
+	if s.revolver.patronCount != 6 {
+		s.revolver.patronCount = 6
+		s.revolver.setState(s.revolver.charged)
+		return nil
+	} else {
+		return fmt.Errorf("The revolver is already loaded!")
+	}
 }
 
 func (s *StateChargedRevolver) shoot() error {
@@ -137,9 +147,27 @@ func (s *StateOnFuseRevolver) putOnFuse() error {
 }
 
 func main() {
-	revolver := newRevolver(6)
+	revolver := newRevolver(1)
 
 	err := revolver.shoot()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	fmt.Println(revolver.getPatronCount())
+
+	err = revolver.charge()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	fmt.Println(revolver.getPatronCount())
+
+	err = revolver.putOnFuse()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	err = revolver.shoot()
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
