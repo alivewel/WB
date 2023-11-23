@@ -41,8 +41,8 @@ func (r *Revolver) shoot() error {
 	return r.currentState.shoot()
 }
 
-func (r *Revolver) putOnFuse() error {
-	return r.currentState.putOnFuse()
+func (r *Revolver) switchFuse() error {
+	return r.currentState.switchFuse()
 }
 
 func (r *Revolver) incrementPatron() {
@@ -58,7 +58,7 @@ func (r *Revolver) getPatronCount() int {
 type State interface {
 	charge() error
 	shoot() error
-	putOnFuse() error
+	switchFuse() error
 }
 
 type StateChargedRevolver struct {
@@ -81,19 +81,15 @@ func (s *StateChargedRevolver) shoot() error {
 		s.revolver.incrementPatron()
 		return nil
 	} else {
-		s.revolver.setState(s.revolver.charged)
+		s.revolver.setState(s.revolver.discharged)
 		return fmt.Errorf("Patrons are out!")
 	}
 }
 
-func (s *StateChargedRevolver) putOnFuse() error {
-	if s.revolver.currentState != s.revolver.discharged {
-		s.revolver.setState(s.revolver.discharged)
-		fmt.Println("The revolver is on safety!")
-		return nil
-	} else {
-		return fmt.Errorf("The revolver is already loaded!")
-	}
+func (s *StateChargedRevolver) switchFuse() error {
+	s.revolver.setState(s.revolver.onFuse)
+	fmt.Println("The revolver is on safety!")
+	return nil
 }
 
 type StateDischargedRevolver struct {
@@ -101,27 +97,19 @@ type StateDischargedRevolver struct {
 }
 
 func (s *StateDischargedRevolver) charge() error {
-	if s.revolver.patronCount != 6 {
-		s.revolver.patronCount = 6
-		s.revolver.setState(s.revolver.charged)
-		return nil
-	} else {
-		return fmt.Errorf("The revolver is already loaded!")
-	}
+	s.revolver.patronCount = 6
+	s.revolver.setState(s.revolver.charged)
+	return nil
 }
 
 func (s *StateDischargedRevolver) shoot() error {
-	return fmt.Errorf("Patrons are out!")
+	return fmt.Errorf("Patrons are out!!!")
 }
 
-func (s *StateDischargedRevolver) putOnFuse() error {
-	if s.revolver.currentState != s.revolver.discharged {
-		s.revolver.setState(s.revolver.discharged)
-		fmt.Println("The revolver is on safety!")
-		return nil
-	} else {
-		return fmt.Errorf("The revolver is already loaded!")
-	}
+func (s *StateDischargedRevolver) switchFuse() error {
+	s.revolver.setState(s.revolver.onFuse)
+	fmt.Println("The revolver is on safety!")
+	return nil
 }
 
 type StateOnFuseRevolver struct {
@@ -142,8 +130,16 @@ func (s *StateOnFuseRevolver) shoot() error {
 	return fmt.Errorf("The revolver is on safety!")
 }
 
-func (s *StateOnFuseRevolver) putOnFuse() error {
-	return fmt.Errorf("The revolver is already on safety!")
+func (s *StateOnFuseRevolver) switchFuse() error {
+	if s.revolver.patronCount > 0 {
+		s.revolver.setState(s.revolver.charged)
+		fmt.Println("The revolver is off safety!")
+		return nil
+	} else {
+		s.revolver.setState(s.revolver.discharged)
+		fmt.Println("The revolver is off safety!")
+		return nil
+	}
 }
 
 func main() {
@@ -162,7 +158,7 @@ func main() {
 	}
 	fmt.Println(revolver.getPatronCount())
 
-	err = revolver.putOnFuse()
+	err = revolver.switchFuse()
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
