@@ -1,0 +1,11 @@
+echo -e "apple\torange\tbanana" | cut -f1
+echo "apple,orange,banana" | cut -d',' -s -f2
+
+echo "name: John Doe" | cut -d': ' -f2
+cut: bad delimiter
+// выводить ошибку о плохом разделителе
+
+alivewel@pr-n6 ~ % echo "apple,orange,banana" | cut   
+usage: cut -b list [-n] [file ...]
+       cut -c list [file ...]
+       cut -f list [-s] [-d delim] [file ...]
