@@ -1,0 +1,2 @@
+grep -A 2 "orange" example.txt
+go run main.go -A 2 "orange" example.txt
