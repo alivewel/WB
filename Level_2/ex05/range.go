@@ -4,14 +4,20 @@ import (
 	"fmt"
 )
 
-func generateRange(start, offset, maxNum int, result []int) []int {
+var (
+	flagA bool = false
+	flagB bool = false
+	flagC bool = true
+)
+
+func generateRange(start, offset, maxNum int, result *[]int) {
 	if offset > 0 {
 		// В случае положительного offset
 		for i := start + 1; i <= start+offset; i++ {
 			if i > maxNum {
 				break
 			}
-			result = append(result, i)
+			*result = append(*result, i)
 		}
 	} else if offset < 0 {
 		// В случае отрицательного offset
@@ -19,15 +25,34 @@ func generateRange(start, offset, maxNum int, result []int) []int {
 			if i < 0 {
 				break
 			}
-			result = append(result, i)
+			*result = append(*result, i)
 		}
 	} else {
 		// В случае offset равного нулю
-		result = append(result, start)
+		*result = append(*result, start)
 	}
-	// if true {
-	// 	result = generateRange(start, -offset, maxNum, result)
-	// }
+}
+
+func addArr(start, offset, maxNum int, result *[]int) {
+	if flagA || flagC {
+		generateRange(start, offset, maxNum, result)
+	}
+	if flagB || flagC {
+		generateRange(start, -offset, maxNum, result)
+	}
+	*result = append(*result, start)
+}
+
+func removeDuplicates(input []int) []int {
+	uniqueMap := make(map[int]bool)
+	var result []int
+	for _, num := range input {
+		if !uniqueMap[num] {
+			// Если элемент не встречался ранее, добавляем его в результат и карту
+			result = append(result, num)
+			uniqueMap[num] = true
+		}
+	}
 	return result
 }
 
@@ -37,12 +62,14 @@ func main() {
 	offset := -3
 	maxNum := 7
 
-	result = generateRange(start, offset, maxNum, result)
+	addArr(start, offset, maxNum, &result)
+	result = removeDuplicates(result)
+	// generateRange(start, offset, maxNum, &result)
 
-	start = 5
-	offset = 3
-	maxNum = 7
+	// start = 5
+	// offset = 3
+	// maxNum = 7
 
-	result = generateRange(start, offset, maxNum, result)
+	// generateRange(start, offset, maxNum, &result)
 	fmt.Println(result)
 }
