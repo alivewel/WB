@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 )
 
 type Flags struct {
@@ -34,14 +36,14 @@ func init() {
 
 func main() {
 	// Парсинг флагов
-	fmt.Println("Flag A:", flags.flagA)
-	fmt.Println("Flag B:", flags.flagB)
-	fmt.Println("Flag C:", flags.flagC)
-	fmt.Println("Flag c:", flags.flagc)
-	fmt.Println("Flag I:", flags.flagI)
-	fmt.Println("Flag V:", flags.flagV)
-	fmt.Println("Flag F:", flags.flagF)
-	fmt.Println("Flag N:", flags.flagN)
+	// fmt.Println("Flag A:", flags.flagA)
+	// fmt.Println("Flag B:", flags.flagB)
+	// fmt.Println("Flag C:", flags.flagC)
+	// fmt.Println("Flag c:", flags.flagc)
+	// fmt.Println("Flag I:", flags.flagI)
+	// fmt.Println("Flag V:", flags.flagV)
+	// fmt.Println("Flag F:", flags.flagF)
+	// fmt.Println("Flag N:", flags.flagN)
 
 	// Получение остальных аргументов (паттерн и файлы)
 	args := flag.Args()
@@ -53,26 +55,29 @@ func main() {
 	pattern := args[0]
 	files := args[1:]
 
-	fmt.Println("files", files)
-	fmt.Println("pattern", pattern)
+	// fmt.Println("files", files)
+	// fmt.Println("pattern", pattern)
 
+	var allScanStr [][]string
 	// Применение фильтрации к каждому файлу
-	// for _, file := range files {
-	// 	err := grepFile(pattern, file, *afterFlag, *beforeFlag, *contextFlag)
-	// 	if err != nil {
-	// 		fmt.Println("Error:", err)
-	// 	}
-	// }
+	for _, file := range files {
+		scanStr, err := grepFile(pattern, file)
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+		allScanStr = append(allScanStr, scanStr)
+	}
 }
 
-func grepFile(pattern, filename string, after, before, context int) error {
+func grepFile(pattern, filename string) ([]string, error) {
 	file, err := os.Open(filename)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+	var scanStr []string
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -83,10 +88,18 @@ func grepFile(pattern, filename string, after, before, context int) error {
 		}
 	}
 
-	return nil
+	return scanStr, nil
 }
 
 func containsPattern(line, pattern string) bool {
-
-	return true // Ваша реализация проверки наличия паттерна в строке
+	if flags.flagI {
+		line = strings.ToLower(line)
+		line = strings.ToLower(pattern)
+	}
+	if flags.flagF {
+		return strings.Contains(line, pattern)
+	} else {
+		re := regexp.MustCompile(pattern)
+		return re.MatchString(line)
+	}
 }
