@@ -91,6 +91,7 @@ func main() {
 	// убрать дубликаты
 	// отсортировать
 	prepareIndex(allIndexStr)
+
 	if flags.flagV {
 		allIndexStr = invertIndex(allIndexStr, allScanStr)
 	}
@@ -108,6 +109,9 @@ func main() {
 			for j := 0; j < len(allIndexStr[i]); j++ {
 				if len(allIndexStr) > 1 {
 					fmt.Printf("%s:", files[i])
+				}
+				if flags.flagN {
+					fmt.Printf("%d:", allIndexStr[i][j]+1)
 				}
 				if len(allScanStr[i]) > allIndexStr[i][j] { // чтобы не выходить за пределы массива строк
 					fmt.Println(allScanStr[i][allIndexStr[i][j]])
