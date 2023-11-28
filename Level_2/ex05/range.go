@@ -44,10 +44,10 @@ func addArr(start, offset, maxNum int, result *[]int) {
 	*result = append(*result, start)
 }
 
-func removeDuplicates(input []int) []int {
+func removeDuplicates(input *[]int) []int {
 	uniqueMap := make(map[int]bool)
 	var result []int
-	for _, num := range input {
+	for _, num := range *input {
 		if !uniqueMap[num] {
 			// Если элемент не встречался ранее, добавляем его в результат и карту
 			result = append(result, num)
@@ -64,7 +64,7 @@ func main() {
 	maxNum := 7
 
 	addArr(start, offset, maxNum, &result)
-	result = removeDuplicates(result)
+	removeDuplicates(&result)
 	sort.Ints(result)
 	// generateRange(start, offset, maxNum, &result)
 

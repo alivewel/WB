@@ -1,5 +1,8 @@
-apple
-orange
-banana
-grape
-kiwi
+1_look
+2_pen
+3_pple
+4_orange
+5_banana
+6_grape
+7_kiwi
+8_monkey

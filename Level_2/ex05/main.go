@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -70,9 +71,29 @@ func main() {
 		allIndexStr = append(allIndexStr, indexStr)
 	}
 
-	for i := 0; i < len(allScanStr); i++ {
-		for j := 0; j < len(allScanStr[i]); j++ {
-			fmt.Println(allScanStr[i][j])
+	for i := 0; i < len(allIndexStr); i++ {
+		for j := 0; j < len(allIndexStr[i]); j++ {
+			fmt.Println(allIndexStr[i][j])
+		}
+		fmt.Println()
+	}
+
+	// for i := 0; i < len(allScanStr); i++ {
+	// 	for j := 0; j < len(allScanStr[i]); j++ {
+	// 		fmt.Println(allScanStr[i][j])
+	// 	}
+	// 	fmt.Println()
+	// }
+
+	// убрать дубликаты
+	// отсортировать
+	prepareIndex(allIndexStr)
+
+	for i := 0; i < len(allIndexStr); i++ {
+		for j := 0; j < len(allIndexStr[i]); j++ {
+			if len(allScanStr[i]) > allIndexStr[i][j] { // чтобы не выходить за пределы массива строк
+				fmt.Println(allScanStr[i][allIndexStr[i][j]])
+			}
 		}
 		fmt.Println()
 	}
@@ -92,13 +113,14 @@ func grepFile(pattern, filename string) ([]string, []int, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		scanStr = append(scanStr, line)
-		count++
+		
 		// Проверка на совпадение паттерна
 		if containsPattern(line, pattern) {
-			fmt.Println(line)
+			// fmt.Println(line)
 			// indexStr = append(indexStr, count)
 			addRangeNum(count, &indexStr)
 		}
+		count++
 	}
 
 	return scanStr, indexStr, nil
@@ -125,7 +147,7 @@ func generateRange(start, offset int, result *[]int) {
 		}
 	} else if offset < 0 {
 		// В случае отрицательного offset
-		for i := start - 1; i >= start+offset; i-- {
+		for i := start; i >= start+offset; i-- {
 			if i < 0 {
 				break
 			}
@@ -160,6 +182,13 @@ func removeDuplicates(input []int) []int {
 		}
 	}
 	return result
+}
+
+func prepareIndex(input [][]int) {
+	for i := 0; i < len(input); i++ {
+		input[i] = removeDuplicates(input[i])
+		sort.Ints(input[i])
+	}
 }
 
 func max(a, b int) int {
