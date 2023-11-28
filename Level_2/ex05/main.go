@@ -23,7 +23,8 @@ type Flags struct {
 
 var flags Flags
 
-func init() {
+// тесты с функцией init не работают, пришлось создать свою функцию
+func initFlags() {
 	flag.IntVar(&flags.flagA, "A", 0, "Print N lines after each match")
 	flag.IntVar(&flags.flagB, "B", 0, "Print N lines before each match")
 	flag.IntVar(&flags.flagC, "C", 0, "Print N lines of output context")
@@ -36,6 +37,8 @@ func init() {
 }
 
 func main() {
+	initFlags()
+
 	args := flag.Args()
 	if len(args) < 1 {
 		fmt.Println("Usage: grep-go [OPTIONS] PATTERN FILE [FILE...]")
@@ -45,13 +48,10 @@ func main() {
 	pattern := args[0]
 	files := args[1:]
 
-	// fmt.Println("files", files)
-	// fmt.Println("pattern", pattern)
-
 	var allScanStr [][]string // все отсканированные строки в каждом файле
 	var allIndexStr [][]int   // индексы совпадающих строк в каждом файле
 	var countContain []int    // количество совпадений в каждом файле
-	// Применение фильтрации к каждому файлу
+
 	for _, file := range files {
 		var count int
 		scanStr, indexStr, err := grepFile(pattern, file, &count)
@@ -65,6 +65,7 @@ func main() {
 
 	prepareIndex(allIndexStr)
 
+	// инвертируем все индексы в массиве allIndexStr
 	if flags.flagV {
 		allIndexStr = invertIndex(allIndexStr, allScanStr)
 	}
@@ -191,7 +192,6 @@ func max(a, b int) int {
 	return b
 }
 
-
 func printResult(allScanStr [][]string, allIndexStr [][]int, countContain []int, files []string) {
 	if flags.flagc {
 		for i := 0; i < len(allIndexStr); i++ {
@@ -213,7 +213,7 @@ func printResult(allScanStr [][]string, allIndexStr [][]int, countContain []int,
 					fmt.Println(allScanStr[i][allIndexStr[i][j]])
 				}
 			}
-			if len(allIndexStr) > 1 && i != len(allIndexStr)-1 {
+			if len(allIndexStr) > 1 && i != len(allIndexStr)-1 && (flags.flagA > 0 || flags.flagB > 0 || flags.flagC > 0) {
 				fmt.Printf("--\n")
 			}
 		}
