@@ -36,17 +36,6 @@ func init() {
 }
 
 func main() {
-	// Парсинг флагов
-	// fmt.Println("Flag A:", flags.flagA)
-	// fmt.Println("Flag B:", flags.flagB)
-	// fmt.Println("Flag C:", flags.flagC)
-	// fmt.Println("Flag c:", flags.flagc)
-	// fmt.Println("Flag I:", flags.flagI)
-	// fmt.Println("Flag V:", flags.flagV)
-	// fmt.Println("Flag F:", flags.flagF)
-	// fmt.Println("Flag N:", flags.flagN)
-
-	// Получение остальных аргументов (паттерн и файлы)
 	args := flag.Args()
 	if len(args) < 1 {
 		fmt.Println("Usage: grep-go [OPTIONS] PATTERN FILE [FILE...]")
@@ -74,55 +63,13 @@ func main() {
 		countContain = append(countContain, count)
 	}
 
-	// for i := 0; i < len(allIndexStr); i++ {
-	// 	for j := 0; j < len(allIndexStr[i]); j++ {
-	// 		fmt.Println(allIndexStr[i][j])
-	// 	}
-	// 	fmt.Println()
-	// }
-
-	// for i := 0; i < len(allScanStr); i++ {
-	// 	for j := 0; j < len(allScanStr[i]); j++ {
-	// 		fmt.Println(allScanStr[i][j])
-	// 	}
-	// 	fmt.Println()
-	// }
-
-	// убрать дубликаты
-	// отсортировать
 	prepareIndex(allIndexStr)
 
 	if flags.flagV {
 		allIndexStr = invertIndex(allIndexStr, allScanStr)
 	}
 
-	if flags.flagc {
-		for i := 0; i < len(allIndexStr); i++ {
-			if len(allIndexStr) > 1 {
-				fmt.Printf("%s: ", files[i])
-			}
-			fmt.Println(countContain[i])
-			// fmt.Println(flags.countContain)
-		}
-	} else {
-		for i := 0; i < len(allIndexStr); i++ {
-			for j := 0; j < len(allIndexStr[i]); j++ {
-				if len(allIndexStr) > 1 {
-					fmt.Printf("%s:", files[i])
-				}
-				if flags.flagN {
-					fmt.Printf("%d:", allIndexStr[i][j]+1)
-				}
-				if len(allScanStr[i]) > allIndexStr[i][j] { // чтобы не выходить за пределы массива строк
-					fmt.Println(allScanStr[i][allIndexStr[i][j]])
-				}
-			}
-			if len(allIndexStr) > 1 && i != len(allIndexStr)-1 {
-				fmt.Printf("--\n")
-			}
-		}
-	}
-
+	printResult(allScanStr, allIndexStr, countContain, files)
 }
 
 func grepFile(pattern, filename string, countContain *int) ([]string, []int, error) {
@@ -142,8 +89,6 @@ func grepFile(pattern, filename string, countContain *int) ([]string, []int, err
 
 		// Проверка на совпадение паттерна
 		if containsPattern(line, pattern) {
-			// fmt.Println(line)
-			// indexStr = append(indexStr, count)
 			addRangeNum(count, &indexStr)
 			*countContain++
 		}
@@ -244,4 +189,51 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+
+func printResult(allScanStr [][]string, allIndexStr [][]int, countContain []int, files []string) {
+	if flags.flagc {
+		for i := 0; i < len(allIndexStr); i++ {
+			if len(allIndexStr) > 1 {
+				fmt.Printf("%s: ", files[i])
+			}
+			fmt.Println(countContain[i])
+		}
+	} else {
+		for i := 0; i < len(allIndexStr); i++ {
+			for j := 0; j < len(allIndexStr[i]); j++ {
+				if len(allIndexStr) > 1 {
+					fmt.Printf("%s:", files[i])
+				}
+				if flags.flagN {
+					fmt.Printf("%d:", allIndexStr[i][j]+1)
+				}
+				if len(allScanStr[i]) > allIndexStr[i][j] { // чтобы не выходить за пределы массива строк
+					fmt.Println(allScanStr[i][allIndexStr[i][j]])
+				}
+			}
+			if len(allIndexStr) > 1 && i != len(allIndexStr)-1 {
+				fmt.Printf("--\n")
+			}
+		}
+	}
+}
+
+func printAllIndexStr(allIndexStr [][]int) {
+	for i := 0; i < len(allIndexStr); i++ {
+		for j := 0; j < len(allIndexStr[i]); j++ {
+			fmt.Println(allIndexStr[i][j])
+		}
+		fmt.Println()
+	}
+}
+
+func printAllScanStr(allScanStr [][]string) {
+	for i := 0; i < len(allScanStr); i++ {
+		for j := 0; j < len(allScanStr[i]); j++ {
+			fmt.Println(allScanStr[i][j])
+		}
+		fmt.Println()
+	}
 }
