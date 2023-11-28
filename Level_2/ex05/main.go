@@ -59,24 +59,27 @@ func main() {
 	// fmt.Println("files", files)
 	// fmt.Println("pattern", pattern)
 
-	var allScanStr [][]string
-	var allIndexStr [][]int
+	var allScanStr [][]string // все отсканированные строки в каждом файле
+	var allIndexStr [][]int   // индексы совпадающих строк в каждом файле
+	var countContain []int    // количество совпадений в каждом файле
 	// Применение фильтрации к каждому файлу
 	for _, file := range files {
-		scanStr, indexStr, err := grepFile(pattern, file)
+		var count int
+		scanStr, indexStr, err := grepFile(pattern, file, &count)
 		if err != nil {
 			fmt.Println("Error:", err)
 		}
 		allScanStr = append(allScanStr, scanStr)
 		allIndexStr = append(allIndexStr, indexStr)
+		countContain = append(countContain, count)
 	}
 
-	for i := 0; i < len(allIndexStr); i++ {
-		for j := 0; j < len(allIndexStr[i]); j++ {
-			fmt.Println(allIndexStr[i][j])
-		}
-		fmt.Println()
-	}
+	// for i := 0; i < len(allIndexStr); i++ {
+	// 	for j := 0; j < len(allIndexStr[i]); j++ {
+	// 		fmt.Println(allIndexStr[i][j])
+	// 	}
+	// 	fmt.Println()
+	// }
 
 	// for i := 0; i < len(allScanStr); i++ {
 	// 	for j := 0; j < len(allScanStr[i]); j++ {
@@ -88,18 +91,37 @@ func main() {
 	// убрать дубликаты
 	// отсортировать
 	prepareIndex(allIndexStr)
+	if flags.flagV {
+		allIndexStr = invertIndex(allIndexStr, allScanStr)
+	}
 
-	for i := 0; i < len(allIndexStr); i++ {
-		for j := 0; j < len(allIndexStr[i]); j++ {
-			if len(allScanStr[i]) > allIndexStr[i][j] { // чтобы не выходить за пределы массива строк
-				fmt.Println(allScanStr[i][allIndexStr[i][j]])
+	if flags.flagc {
+		for i := 0; i < len(allIndexStr); i++ {
+			if len(allIndexStr) > 1 {
+				fmt.Printf("%s: ", files[i])
+			}
+			fmt.Println(countContain[i])
+			// fmt.Println(flags.countContain)
+		}
+	} else {
+		for i := 0; i < len(allIndexStr); i++ {
+			for j := 0; j < len(allIndexStr[i]); j++ {
+				if len(allIndexStr) > 1 {
+					fmt.Printf("%s:", files[i])
+				}
+				if len(allScanStr[i]) > allIndexStr[i][j] { // чтобы не выходить за пределы массива строк
+					fmt.Println(allScanStr[i][allIndexStr[i][j]])
+				}
+			}
+			if len(allIndexStr) > 1 && i != len(allIndexStr)-1 {
+				fmt.Printf("--\n")
 			}
 		}
-		fmt.Println()
 	}
+
 }
 
-func grepFile(pattern, filename string) ([]string, []int, error) {
+func grepFile(pattern, filename string, countContain *int) ([]string, []int, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, nil, err
@@ -113,12 +135,13 @@ func grepFile(pattern, filename string) ([]string, []int, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		scanStr = append(scanStr, line)
-		
+
 		// Проверка на совпадение паттерна
 		if containsPattern(line, pattern) {
 			// fmt.Println(line)
 			// indexStr = append(indexStr, count)
 			addRangeNum(count, &indexStr)
+			*countContain++
 		}
 		count++
 	}
@@ -129,7 +152,7 @@ func grepFile(pattern, filename string) ([]string, []int, error) {
 func containsPattern(line, pattern string) bool {
 	if flags.flagI {
 		line = strings.ToLower(line)
-		line = strings.ToLower(pattern)
+		pattern = strings.ToLower(pattern)
 	}
 	if flags.flagF {
 		return strings.Contains(line, pattern)
@@ -189,6 +212,27 @@ func prepareIndex(input [][]int) {
 		input[i] = removeDuplicates(input[i])
 		sort.Ints(input[i])
 	}
+}
+
+func invertIndex(allIndexStr [][]int, allScanStr [][]string) [][]int {
+	result := make([][]int, len(allScanStr))
+	for i := 0; i < len(allScanStr); i++ {
+		for j := 0; j < len(allScanStr[i]); j++ {
+			if !containsElemArr(allIndexStr[i], j) {
+				result[i] = append(result[i], j)
+			}
+		}
+	}
+	return result
+}
+
+func containsElemArr(nums []int, target int) bool {
+	for _, num := range nums {
+		if num == target {
+			return true
+		}
+	}
+	return false
 }
 
 func max(a, b int) int {
