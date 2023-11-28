@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 )
 
 var (
@@ -64,6 +65,7 @@ func main() {
 
 	addArr(start, offset, maxNum, &result)
 	result = removeDuplicates(result)
+	sort.Ints(result)
 	// generateRange(start, offset, maxNum, &result)
 
 	// start = 5
