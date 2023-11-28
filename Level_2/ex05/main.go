@@ -8,15 +8,14 @@ import (
 )
 
 type Flags struct {
-	flagA     int
-	flagB     int
-	flagC     int
-	flagCount bool
-	count     int
-	flagI     bool
-	flagV     bool
-	flagF     bool
-	flagN     bool
+	flagA int
+	flagB int
+	flagC int
+	flagc bool
+	flagI bool
+	flagV bool
+	flagF bool
+	flagN bool
 }
 
 var flags Flags
@@ -25,8 +24,7 @@ func init() {
 	flag.IntVar(&flags.flagA, "A", 0, "Print N lines after each match")
 	flag.IntVar(&flags.flagB, "B", 0, "Print N lines before each match")
 	flag.IntVar(&flags.flagC, "C", 0, "Print N lines of output context")
-	flag.BoolVar(&flags.flagCount, "count", false, "Print only the number of matches")
-	flag.IntVar(&flags.count, "с", 0, "Print only the number of matches")
+	flag.BoolVar(&flags.flagc, "c", false, "Print only the number of matches")
 	flag.BoolVar(&flags.flagI, "i", false, "Case-insensitive match")
 	flag.BoolVar(&flags.flagV, "v", false, "Select non-matching lines")
 	flag.BoolVar(&flags.flagF, "F", false, "Fixed string (disable regular expressions)")
@@ -39,7 +37,10 @@ func main() {
 	fmt.Println("Flag A:", flags.flagA)
 	fmt.Println("Flag B:", flags.flagB)
 	fmt.Println("Flag C:", flags.flagC)
-	fmt.Println("Flag Count:", flags.flagCount)
+	fmt.Println("Flag c:", flags.flagc)
+	fmt.Println("Flag I:", flags.flagI)
+	fmt.Println("Flag V:", flags.flagV)
+	fmt.Println("Flag F:", flags.flagF)
 	fmt.Println("Flag N:", flags.flagN)
 
 	// Получение остальных аргументов (паттерн и файлы)
@@ -49,15 +50,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// pattern := args[0]
-	// files := args[1:]
+	pattern := args[0]
+	files := args[1:]
 
-	// fmt.Println("afterFlag", *afterFlag)
-	// fmt.Println("beforeFlag", *beforeFlag)
-	// fmt.Println("contextFlag", *contextFlag)
-
-	// fmt.Println("files", files)
-	// fmt.Println("pattern", pattern)
+	fmt.Println("files", files)
+	fmt.Println("pattern", pattern)
 
 	// Применение фильтрации к каждому файлу
 	// for _, file := range files {
