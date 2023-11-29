@@ -148,7 +148,6 @@ func getLines(filename string) ([]string, error) {
 }
 
 func areFlagsOff() bool {
-	// Проверяем значения по умолчанию для каждого флага
 	return flags.flagk == 0 &&
 		!flags.flagn &&
 		!flags.flagr &&
@@ -173,7 +172,4 @@ func printLines(lines []string) {
 			}
 		}
 	}
-	// else {
-
-	// }
 }
