@@ -9,31 +9,36 @@ import (
 
 func main() {
 	lines := []string{"пятак", "пятка", "тяпка", "тяпка", "листок", "слиток", "столик", "кошка"}
+
+	cleanLines := checkAnagrams(lines)
+
+	for k, v := range cleanLines {
+		fmt.Printf("%s: %v\n", k, v)
+	}
+}
+
+func checkAnagrams(lines []string) map[string][]string {
 	sortLines := make(map[string][]string, len(lines))
-	// Выводим отсортированные руны
 	for _, line := range lines {
 		lowerLine := strings.ToLower(line)
 		sortLine := sortLine(line) // Массив должен быть отсортирован по возрастанию
 		sortLines[sortLine] = append(sortLines[sortLine], lowerLine)
 	}
 
-
-	sortLines3 := make(map[string][]string)
+	cleanLines := make(map[string][]string)
 	for _, v := range sortLines {
 		if len(v) > 1 { // Множества из одного элемента не должны попасть в результат
 			firstValue := v[0] // Ключ - первое встретившееся в словаре слово из множества
 			prevLine := ""
 			for i := 0; i < len(v); i++ {
 				if prevLine != v[i] { // В результате каждое слово должно встречаться только один раз
-					sortLines3[firstValue] = append(sortLines3[firstValue], v[i])
+					cleanLines[firstValue] = append(cleanLines[firstValue], v[i])
 					prevLine = v[i]
 				}
 			}
 		}
 	}
-	for k, v := range sortLines3 {
-		fmt.Printf("%s: %v\n", k, v)
-	}
+	return cleanLines
 }
 
 func sortLine(line string) string {
