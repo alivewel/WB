@@ -8,35 +8,27 @@ import (
 )
 
 func main() {
-	lines := []string{"пятак", "пятка", "тяпка"}
+	lines := []string{"пятак", "пятка", "тяпка", "тяпка", "листок", "слиток", "столик", "кошка"}
 	sortLines := make(map[string][]string, len(lines))
 	// Выводим отсортированные руны
 	for _, line := range lines {
 		lowerLine := strings.ToLower(line)
-		sortLine := sortLine(line)
-		// fmt.Printf("%s: %s\n", line, sortLine)
+		sortLine := sortLine(line) // Массив должен быть отсортирован по возрастанию
 		sortLines[sortLine] = append(sortLines[sortLine], lowerLine)
 	}
 
-	for k, v := range sortLines {
-		fmt.Printf("%s: %v\n", k, v)
-	}
-	// sortLines2 := make(map[string]string, len(lines))
-	sortLines2 := make(map[string][]string)
-	for k, v := range sortLines {
-		firstValue := v[0]
-		sortLines2[firstValue] = append(sortLines2[firstValue], k)
-	}
-	for k, v := range sortLines2 {
-		fmt.Printf("%s: %v\n", k, v)
-	}
 
-	// sortLines3 := make(map[string]string, len(lines))
 	sortLines3 := make(map[string][]string)
 	for _, v := range sortLines {
-		firstValue := v[0]
-		for i := 0; i < len(v); i++ {
-			sortLines3[firstValue] = append(sortLines3[firstValue], v[i])
+		if len(v) > 1 { // Множества из одного элемента не должны попасть в результат
+			firstValue := v[0] // Ключ - первое встретившееся в словаре слово из множества
+			prevLine := ""
+			for i := 0; i < len(v); i++ {
+				if prevLine != v[i] { // В результате каждое слово должно встречаться только один раз
+					sortLines3[firstValue] = append(sortLines3[firstValue], v[i])
+					prevLine = v[i]
+				}
+			}
 		}
 	}
 	for k, v := range sortLines3 {
