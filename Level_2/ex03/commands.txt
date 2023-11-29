@@ -31,3 +31,35 @@ orange 1
 // без флагов сортировка по первому столбцу
 
 go run sort.go example.txt 
+
+sort example.txt 
+apple 2
+banana 4
+mango 1
+orange 3
+
+go run main.go example.txt
+go run main.go -r example.txt
+go run main.go example_2.txt 
+go run main.go -r example_2.txt
+
+sort -n example_3.txt
+1
+2
+3
+5
+10
+
+sort  example_3.txt 
+1
+10
+2
+3
+5
+
+go run main.go -n example_3.txt
+1
+2
+3
+5
+10

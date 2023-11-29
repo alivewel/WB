@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sort"
+	"strconv"
 )
 
 type Flags struct {
@@ -49,15 +51,60 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	_ = lines
 
-	
+	sortedLines := customSort(lines)
+	printLines(sortedLines)
 }
 
-func customSort(lines []string) {
+func customSort(lines []string) []string {
 	if areFlagsDefault() {
-		
+		notFlags(lines)
 	}
+	if flags.flagr {
+		flagr(lines)
+	}
+	if flags.flagn {
+		flagn(lines)
+	}
+	return lines
+}
+
+func notFlags(lines []string) []string {
+	sort.Slice(lines, func(i, j int) bool {
+		return lines[i] < lines[j]
+	})
+	return lines
+}
+
+func flagr(lines []string) []string {
+	sort.Slice(lines, func(i, j int) bool {
+		return lines[i] > lines[j]
+	})
+	return lines
+}
+
+func isNumeric(s string) bool {
+	_, err := strconv.Atoi(s)
+	return err == nil
+}
+
+func numericLess(i, j string) bool {
+	// Если обе строки числовые, сравниваем их как числа
+	if isNumeric(i) && isNumeric(j) {
+		numI, _ := strconv.Atoi(i)
+		numJ, _ := strconv.Atoi(j)
+		return numI < numJ
+	}
+	// В противном случае, сравниваем их лексикографически
+	return i < j
+}
+
+// сортировка числовая, а не лексикографическая
+func flagn(lines []string) []string {
+	sort.Slice(lines, func(i, j int) bool {
+		return numericLess(lines[i], lines[j])
+	})
+	return lines
 }
 
 func getLines(filename string) ([]string, error) {
@@ -90,4 +137,10 @@ func areFlagsDefault() bool {
 		!flags.flagb &&
 		!flags.flagc &&
 		!flags.flagh
+}
+
+func printLines(lines []string) {
+	for _, line := range lines {
+		fmt.Printf("%s\n", line)
+	}
 }
