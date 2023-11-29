@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 type Flags struct {
@@ -57,7 +58,7 @@ func main() {
 }
 
 func customSort(lines []string) []string {
-	if areFlagsDefault() {
+	if areFlagsOff() {
 		notFlags(lines)
 	}
 	if flags.flagr {
@@ -65,6 +66,12 @@ func customSort(lines []string) []string {
 	}
 	if flags.flagn {
 		flagn(lines)
+	}
+	if flags.flagb {
+		flagb(lines)
+	}
+	if flags.flagc && !flagc(lines) {
+		fmt.Printf("sort: -: disorder:\n")
 	}
 	return lines
 }
@@ -81,6 +88,19 @@ func flagr(lines []string) []string {
 		return lines[i] > lines[j]
 	})
 	return lines
+}
+
+func flagb(lines []string) []string {
+	sort.Slice(lines, func(i, j int) bool {
+		return strings.TrimSpace(lines[i]) < strings.TrimSpace(lines[j])
+	})
+	return lines
+}
+
+func flagc(lines []string) bool {
+	return sort.SliceIsSorted(lines, func(i, j int) bool {
+		return lines[i] < lines[j]
+	})
 }
 
 func isNumeric(s string) bool {
@@ -127,12 +147,12 @@ func getLines(filename string) ([]string, error) {
 	return scanStr, nil
 }
 
-func areFlagsDefault() bool {
+func areFlagsOff() bool {
 	// Проверяем значения по умолчанию для каждого флага
 	return flags.flagk == 0 &&
 		!flags.flagn &&
 		!flags.flagr &&
-		!flags.flagu &&
+		// !flags.flagu &&
 		!flags.flagM &&
 		!flags.flagb &&
 		!flags.flagc &&
@@ -140,7 +160,20 @@ func areFlagsDefault() bool {
 }
 
 func printLines(lines []string) {
-	for _, line := range lines {
-		fmt.Printf("%s\n", line)
+	if !flags.flagc {
+		prevLine := ""
+		for _, line := range lines {
+			if flags.flagu {
+				if prevLine != line {
+					fmt.Printf("%s\n", line)
+					prevLine = line
+				}
+			} else {
+				fmt.Printf("%s\n", line)
+			}
+		}
 	}
+	// else {
+
+	// }
 }
