@@ -111,3 +111,17 @@ echo -e "file1.txt 2K\nfile2.txt 10M\nfile3.txt 1G" | sort -h
 file1.txt 2K
 file2.txt 10M
 file3.txt 1G
+
+go run main.go -h example_8.txt
+
+go run main.go -k 1 example.txt
+apple 2
+banana 4
+mango 1
+orange 3
+
+go run main.go -k 2 example.txt
+mango 1
+apple 2
+orange 3
+banana 4

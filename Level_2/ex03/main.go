@@ -11,28 +11,28 @@ import (
 )
 
 type Flags struct {
-	flagk int
-	flagn bool
-	flagr bool
-	flagu bool
-	flagM bool
-	flagb bool
-	flagc bool
-	flagh bool
+	FlagK int
+	FlagN bool
+	FlagR bool
+	FlagU bool
+	FlagM bool
+	FlagB bool
+	FlagC bool
+	FlagH bool
 }
 
 var flags Flags
 
 // тесты с функцией init не работают, пришлось создать свою функцию
 func initFlags() {
-	flag.IntVar(&flags.flagk, "k", 0, "Specifying the column to sort")
-	flag.BoolVar(&flags.flagn, "n", false, "Sort by numeric value")
-	flag.BoolVar(&flags.flagr, "r", false, "Sort in reverse order")
-	flag.BoolVar(&flags.flagu, "u", false, "Do not print duplicate lines")
-	flag.BoolVar(&flags.flagM, "M", false, "Sort by month name")
-	flag.BoolVar(&flags.flagb, "b", false, "Ignore trailing spaces")
-	flag.BoolVar(&flags.flagc, "c", false, "Check if data is sorted")
-	flag.BoolVar(&flags.flagh, "h", false, "Sort by numeric value taking into account suffixes")
+	flag.IntVar(&flags.FlagK, "k", 0, "Specifying the column to sort")
+	flag.BoolVar(&flags.FlagN, "n", false, "Sort by numeric value")
+	flag.BoolVar(&flags.FlagR, "r", false, "Sort in reverse order")
+	flag.BoolVar(&flags.FlagU, "u", false, "Do not print duplicate lines")
+	flag.BoolVar(&flags.FlagM, "M", false, "Sort by month name")
+	flag.BoolVar(&flags.FlagB, "b", false, "Ignore trailing spaces")
+	flag.BoolVar(&flags.FlagC, "c", false, "Check if data is sorted")
+	flag.BoolVar(&flags.FlagH, "h", false, "Sort by numeric value taking into account suffixes")
 	flag.Parse()
 }
 
@@ -61,20 +61,26 @@ func customSort(lines []string) []string {
 	if areFlagsOff() {
 		notFlags(lines)
 	}
-	if flags.flagr {
-		flagr(lines)
+	if flags.FlagK > 0 {
+		FlagK(lines)
 	}
-	if flags.flagn {
-		flagn(lines)
+	if flags.FlagR {
+		FlagR(lines)
 	}
-	if flags.flagb {
-		flagb(lines)
+	if flags.FlagN {
+		FlagN(lines)
 	}
-	if flags.flagM {
-		flagM(lines)
+	if flags.FlagB {
+		FlagB(lines)
 	}
-	if flags.flagc && !flagc(lines) {
+	if flags.FlagM {
+		FlagM(lines)
+	}
+	if flags.FlagC && !FlagC(lines) {
 		fmt.Printf("sort: -: disorder:\n")
+	}
+	if flags.FlagH {
+		FlagH(lines)
 	}
 	return lines
 }
@@ -86,28 +92,52 @@ func notFlags(lines []string) []string {
 	return lines
 }
 
-func flagr(lines []string) []string {
+func FlagK(lines []string) []string {
+	sort.Slice(lines, func(i, j int) bool {
+		lineI := strings.Split(lines[i], " ")
+		lineJ := strings.Split(lines[j], " ")
+		if len(lineI) < flags.FlagK {
+			if flags.FlagR {
+				return true
+			}
+			return false
+		}
+		if len(lineJ) < flags.FlagK {
+			if flags.FlagR {
+				return false
+			}
+			return true
+		}
+		if flags.FlagR {
+			return lineI[flags.FlagK-1] > lineJ[flags.FlagK-1]
+		}
+		return lineI[flags.FlagK-1] < lineJ[flags.FlagK-1]
+	})
+	return lines
+}
+
+func FlagR(lines []string) []string {
 	sort.Slice(lines, func(i, j int) bool {
 		return lines[i] > lines[j]
 	})
 	return lines
 }
 
-func flagM(lines []string) []string {
+func FlagM(lines []string) []string {
 	sort.Slice(lines, func(i, j int) bool {
 		return getMonthNumber(lines[i]) < getMonthNumber(lines[j])
 	})
 	return lines
 }
 
-func flagb(lines []string) []string {
+func FlagB(lines []string) []string {
 	sort.Slice(lines, func(i, j int) bool {
 		return strings.TrimSpace(lines[i]) < strings.TrimSpace(lines[j])
 	})
 	return lines
 }
 
-func flagc(lines []string) bool {
+func FlagC(lines []string) bool {
 	return sort.SliceIsSorted(lines, func(i, j int) bool {
 		return lines[i] < lines[j]
 	})
@@ -130,9 +160,16 @@ func numericLess(i, j string) bool {
 }
 
 // сортировка числовая, а не лексикографическая
-func flagn(lines []string) []string {
+func FlagN(lines []string) []string {
 	sort.Slice(lines, func(i, j int) bool {
 		return numericLess(lines[i], lines[j])
+	})
+	return lines
+}
+
+func FlagH(lines []string) []string {
+	sort.Slice(lines, func(i, j int) bool {
+		return numericLessWithSuffix(lines[i], lines[j])
 	})
 	return lines
 }
@@ -158,13 +195,13 @@ func getLines(filename string) ([]string, error) {
 }
 
 func areFlagsOff() bool {
-	return flags.flagk == 0 &&
-		!flags.flagn &&
-		!flags.flagr &&
-		!flags.flagM &&
-		!flags.flagb &&
-		!flags.flagc &&
-		!flags.flagh
+	return flags.FlagK == 0 &&
+		!flags.FlagN &&
+		!flags.FlagR &&
+		!flags.FlagM &&
+		!flags.FlagB &&
+		!flags.FlagC &&
+		!flags.FlagH
 }
 
 func getMonthNumber(monthName string) int {
@@ -205,11 +242,45 @@ func getMonthNumber(monthName string) int {
 	return number
 }
 
+func numericLessWithSuffix(a, b string) bool {
+	// Разделяем строку на основную часть и суффикс
+	aMain, aSuffix := splitMainAndSuffix(a)
+	bMain, bSuffix := splitMainAndSuffix(b)
+
+	// Если основные части не равны, сравниваем их
+	if aMain != bMain {
+		return aMain < bMain
+	}
+
+	// Если основные части равны, преобразуем суффиксы в числа и сравниваем
+	aNum, errA := strconv.Atoi(aSuffix)
+	bNum, errB := strconv.Atoi(bSuffix)
+
+	// Если преобразование прошло успешно, сравниваем числа
+	if errA == nil && errB == nil {
+		return aNum < bNum
+	}
+
+	// Иначе, если хотя бы один из суффиксов не является числом,
+	// сравниваем строки как текст
+	return a < b
+}
+
+func splitMainAndSuffix(s string) (main, suffix string) {
+	parts := strings.Split(s, ".")
+	if len(parts) > 1 {
+		// Если строка содержит точку, считаем, что суффикс — это все, что после точки
+		return parts[0], parts[1]
+	}
+	// Если точка отсутствует, считаем, что нет суффикса
+	return s, ""
+}
+
 func printLines(lines []string) {
-	if !flags.flagc {
+	if !flags.FlagC {
 		prevLine := ""
 		for _, line := range lines {
-			if flags.flagu {
+			if flags.FlagU {
 				if prevLine != line {
 					fmt.Printf("%s\n", line)
 					prevLine = line
