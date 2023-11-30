@@ -6,26 +6,10 @@ import (
 	"unicode"
 )
 
-func parserString(in string) string {
-	out := make([]rune, 10)
-	counter := 1
-	for i := 1; i < len(in); i++ {
-		if in[i-1] == in[i] {
-			counter++
-		} else if in[i-1] != in[i] {
-			out = append(out, rune(in[i-1]))
-			out = append(out, rune('0'+counter))
-			counter = 1
-		}
-	}
-	out = append(out, rune(in[len(in)-1]))
-	out = append(out, rune('0'+counter))
-	return string(out)
-}
-
 func main() {
+	str := "qwe\\\\5"
 	// str := "qwe\x04\x05"
-	str := "qwe\x045"
+	// str := "qwe\x045"
 	// str := "a11bc2d5e"
 	// str := "a0bc2d5e"
 	// str := "abcd"
@@ -33,38 +17,41 @@ func main() {
 	// str := ""
 	newStr := ""
 	currentDigit := ""
-	var digit int
-	var prevSym rune
-	escape := false
-	for _, char := range str {
-		if escape {
-			if unicode.IsDigit(char) {
-				currentDigit += string(char)
-				digit, _ = strconv.Atoi(currentDigit)
-			} else {
-				newStr += string(prevSym)
+	// var digit int
+	// var countSlash int
+	digit, countSlash := 0, 0
+	// var prevSym rune
+	for i, char := range str {
+		if unicode.IsDigit(char) {
+			currentDigit += string(char)
+			digit, _ = strconv.Atoi(currentDigit)
+		} else if unicode.IsLetter(char) {
+			if i == 0 {
+				newStr += string(char)
 			}
-			prevSym = char
-		} else {
-			if unicode.IsDigit(char) {
-				currentDigit += string(char)
-				digit, _ = strconv.Atoi(currentDigit)
-			} else {
-				for i := digit - 1; i > 0; i-- {
-					newStr += string(prevSym)
-				}
-				if digit != 0 {
-					newStr += string(prevSym)
-				}
-				currentDigit = ""
-				digit = -1
-				prevSym = char
+			for i := digit - 1; i > 0; i-- {
+				// newStr += string(prevSym)
+				newStr += string(char)
 			}
-		}
-		if char == '/' {
-			escape = true
+			if digit != 0 {
+				// newStr += string(prevSym)
+				newStr += string(char)
+			}
+			currentDigit = ""
+			digit = -1
+			// prevSym = char
+		} else if char == '\\' {
+			countSlash++
+			fmt.Println("countSlash", countSlash)
+			if countSlash == 2 {
+				// if prevSym != '0' {
+				// 	newStr += string(prevSym)
+				// }
+				newStr += string(char)
+				countSlash = 0
+				fmt.Println("!", string(char))
+			}
 		}
 	}
-	newStr += string(prevSym)
 	fmt.Println(newStr)
 }
