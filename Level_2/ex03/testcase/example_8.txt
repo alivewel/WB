@@ -1,0 +1,3 @@
+file1.txt 2K
+file3.txt 1G
+file2.txt 10M

@@ -89,3 +89,41 @@ banana
 sort -c example_3.txt
 echo -e "3\n2\n1" | sort -c
 echo -e "1\n2\n3" | sort -c
+
+echo -e "december\nmay\napril\njune" | sort -M
+april
+december
+june
+may
+alivewel@pr-o2 ex03 % echo -e "Декабрь\nМай\nАпрель\nИюнь" | sort -M
+Апрель
+Май
+Июнь
+Декабрь
+// оригинальная утилита не сортирует месяцы на английском
+
+echo -e "file1.txt.2K\nfile2.txt.10M\nfile3.txt.1G" | sort -h
+file1.txt.2K
+file2.txt.10M
+file3.txt.1G
+
+echo -e "file1.txt 2K\nfile2.txt 10M\nfile3.txt 1G" | sort -h
+file1.txt 2K
+file2.txt 10M
+file3.txt 1G
+
+go run main.go -h example_8.txt
+
+go run main.go -k 1 example.txt
+apple 2
+banana 4
+mango 1
+orange 3
+
+go run main.go -k 2 example.txt
+mango 1
+apple 2
+orange 3
+banana 4
+
+если в go.mod указать module sort тесты всегда начинают проходить
