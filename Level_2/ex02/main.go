@@ -17,10 +17,7 @@ func main() {
 	// str := ""
 	newStr := ""
 	currentDigit := ""
-	// var digit int
-	// var countSlash int
 	digit, countSlash := 0, 0
-	// var prevSym rune
 	for i, char := range str {
 		if unicode.IsDigit(char) {
 			currentDigit += string(char)
@@ -30,11 +27,9 @@ func main() {
 				newStr += string(char)
 			}
 			for i := digit - 1; i > 0; i-- {
-				// newStr += string(prevSym)
 				newStr += string(char)
 			}
 			if digit != 0 {
-				// newStr += string(prevSym)
 				newStr += string(char)
 			}
 			currentDigit = ""
@@ -44,9 +39,6 @@ func main() {
 			countSlash++
 			fmt.Println("countSlash", countSlash)
 			if countSlash == 2 {
-				// if prevSym != '0' {
-				// 	newStr += string(prevSym)
-				// }
 				newStr += string(char)
 				countSlash = 0
 				fmt.Println("!", string(char))
