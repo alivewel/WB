@@ -89,3 +89,25 @@ banana
 sort -c example_3.txt
 echo -e "3\n2\n1" | sort -c
 echo -e "1\n2\n3" | sort -c
+
+echo -e "december\nmay\napril\njune" | sort -M
+april
+december
+june
+may
+alivewel@pr-o2 ex03 % echo -e "Декабрь\nМай\nАпрель\nИюнь" | sort -M
+Апрель
+Май
+Июнь
+Декабрь
+// оригинальная утилита не сортирует месяцы на английском
+
+echo -e "file1.txt.2K\nfile2.txt.10M\nfile3.txt.1G" | sort -h
+file1.txt.2K
+file2.txt.10M
+file3.txt.1G
+
+echo -e "file1.txt 2K\nfile2.txt 10M\nfile3.txt 1G" | sort -h
+file1.txt 2K
+file2.txt 10M
+file3.txt 1G

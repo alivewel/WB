@@ -70,6 +70,9 @@ func customSort(lines []string) []string {
 	if flags.flagb {
 		flagb(lines)
 	}
+	if flags.flagM {
+		flagM(lines)
+	}
 	if flags.flagc && !flagc(lines) {
 		fmt.Printf("sort: -: disorder:\n")
 	}
@@ -86,6 +89,13 @@ func notFlags(lines []string) []string {
 func flagr(lines []string) []string {
 	sort.Slice(lines, func(i, j int) bool {
 		return lines[i] > lines[j]
+	})
+	return lines
+}
+
+func flagM(lines []string) []string {
+	sort.Slice(lines, func(i, j int) bool {
+		return getMonthNumber(lines[i]) < getMonthNumber(lines[j])
 	})
 	return lines
 }
@@ -151,11 +161,48 @@ func areFlagsOff() bool {
 	return flags.flagk == 0 &&
 		!flags.flagn &&
 		!flags.flagr &&
-		// !flags.flagu &&
 		!flags.flagM &&
 		!flags.flagb &&
 		!flags.flagc &&
 		!flags.flagh
+}
+
+func getMonthNumber(monthName string) int {
+	months := map[string]int{
+		"январь":    1,
+		"февраль":   2,
+		"март":      3,
+		"апрель":    4,
+		"май":       5,
+		"июнь":      6,
+		"июль":      7,
+		"август":    8,
+		"сентябрь":  9,
+		"октябрь":   10,
+		"ноябрь":    11,
+		"декабрь":   12,
+		"january":   1,
+		"february":  2,
+		"march":     3,
+		"april":     4,
+		"may":       5,
+		"june":      6,
+		"july":      7,
+		"august":    8,
+		"september": 9,
+		"october":   10,
+		"november":  11,
+		"december":  12,
+	}
+
+	monthName = strings.ToLower(monthName)
+
+	number, found := months[monthName]
+	if !found {
+		return 0
+	}
+
+	return number
 }
 
 func printLines(lines []string) {
