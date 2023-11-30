@@ -125,3 +125,5 @@ mango 1
 apple 2
 orange 3
 banana 4
+
+если в go.mod указать module sort тесты всегда начинают проходить
