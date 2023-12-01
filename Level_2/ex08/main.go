@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"syscall"
 )
 
 func main() {
@@ -31,9 +33,9 @@ func ExecuteCommand(args []string) {
 		case "pwd":
 			pwd(args)
 		case "echo":
-			echo()
+			echo(args)
 		case "kill":
-			kill()
+			kill(args)
 		case "ps":
 			ps()
 		}
@@ -69,12 +71,43 @@ func pwd(args []string) {
 	}
 }
 
-func echo() {
-
+func echo(args []string) {
+	if len(args) > 2 {
+		for i, arg := range args[2:] {
+			fmt.Printf(arg)
+			if i != len(args[2:])-1 {
+				fmt.Printf(" ")
+			}
+		}
+		fmt.Printf("\n")
+	}
 }
 
-func kill() {
+func kill(args []string) {
+	numArgs := len(args)
+	if numArgs == 3 || numArgs == 4 {
+		pid, err := strconv.Atoi(args[numArgs-1])
+		if err != nil {
+			fmt.Println("kill: illegal pid:", args[2])
+			os.Exit(1)
+		}
 
+		_, err = os.FindProcess(pid)
+		if err != nil {
+			fmt.Printf("kill: kill %d failed: no such process", pid)
+			os.Exit(1)
+		}
+
+		signal := syscall.SIGTERM
+		if numArgs == 4 && args[numArgs-2] == "-9" {
+			signal = syscall.SIGKILL
+		}
+		err = syscall.Kill(pid, signal)
+		if err != nil {
+			fmt.Println("Error sending signal:", err)
+			os.Exit(1)
+		}
+	}
 }
 
 func ps() {
