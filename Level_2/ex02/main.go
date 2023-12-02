@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	str := "qwe\\\\5"
+	str := "a4bc2d5e"
+	// str := "qwe\\\\5"
 	// str := "qwe\x04\x05"
 	// str := "qwe\x045"
 	// str := "a11bc2d5e"
@@ -15,26 +16,39 @@ func main() {
 	// str := "abcd"
 	// str := "45"
 	// str := ""
-	newStr := ""
-	currentDigit := ""
+	newStr, currentDigit := "", ""
 	digit, countSlash := 0, 0
-	for i, char := range str {
+	tempStr := ""
+	for _, char := range str {
 		if unicode.IsDigit(char) {
-			currentDigit += string(char)
-			digit, _ = strconv.Atoi(currentDigit)
+			if countSlash == 1 {
+				newStr += string(char)
+			} else {
+				currentDigit += string(char)
+				digit, _ = strconv.Atoi(currentDigit)
+				// fmt.Println("currentDigit", currentDigit)
+				// fmt.Println("digit", digit)
+			}
 		} else if unicode.IsLetter(char) {
-			if i == 0 {
-				newStr += string(char)
+			if digit == 0 {
+				tempStr += string(char)
+				fmt.Println("tempStr2", tempStr)
+			} else {
+				for i := digit - 1; i > 0; i-- {
+					// newStr += string(char)
+					newStr += tempStr
+				}
+				if digit != 0 {
+					// newStr += string(char)
+					newStr += tempStr
+				}
+				tempStr += string(char)
+				newStr += tempStr
+				fmt.Println("tempStr", tempStr)
+				currentDigit = ""
+				tempStr = ""
+				digit = -1
 			}
-			for i := digit - 1; i > 0; i-- {
-				newStr += string(char)
-			}
-			if digit != 0 {
-				newStr += string(char)
-			}
-			currentDigit = ""
-			digit = -1
-			// prevSym = char
 		} else if char == '\\' {
 			countSlash++
 			fmt.Println("countSlash", countSlash)
