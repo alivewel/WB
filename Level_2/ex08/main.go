@@ -6,6 +6,9 @@ import (
 	"path/filepath"
 	"strconv"
 	"syscall"
+	"time"
+
+	"github.com/shirou/gopsutil/process"
 )
 
 func main() {
@@ -111,5 +114,26 @@ func kill(args []string) {
 }
 
 func ps() {
+	processList, err := process.Processes()
+	if err != nil {
+		fmt.Println("Ошибка при получении списка процессов:", err)
+		os.Exit(1)
+	}
 
+	fmt.Printf("%-5s %-10s %-10s %s\n", "PID", "TTY", "TIME", "CMD")
+	for _, p := range processList {
+		cmd, err := p.CmdlineSlice()
+		if err != nil {
+			cmd = []string{"unknown"}
+		}
+
+		startTime, err := p.CreateTime()
+		if err != nil {
+			fmt.Println("Ошибка при получении времени создания процесса:", err)
+			continue
+		}
+		elapsed := time.Since(time.Unix(0, startTime*int64(time.Millisecond))).Truncate(time.Second)
+
+		fmt.Printf("%-5d %-10s %s %-20s\n", p.Pid, "?", elapsed, cmd)
+	}
 }
