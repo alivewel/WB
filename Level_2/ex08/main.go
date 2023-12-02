@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"syscall"
@@ -12,19 +13,9 @@ import (
 )
 
 func main() {
-	// os.Args содержит срез строк, представляющих аргументы командной строки
 	args := os.Args
 
 	ExecuteCommand(args)
-
-	// path := "/Users/alivewel/WB/Level_2"
-
-	// // Используем функцию filepath.Dir() для отсечения последнего отрезка
-	// parentDir := filepath.Dir(path)
-
-	// fmt.Println(parentDir)
-	// Последующие элементы - аргументы командной строки
-	// fmt.Println("Аргументы командной строки:", args[1:])
 }
 
 func ExecuteCommand(args []string) {
@@ -41,6 +32,8 @@ func ExecuteCommand(args []string) {
 			kill(args)
 		case "ps":
 			ps()
+		case "fork":
+			fork(args)
 		}
 	}
 }
@@ -58,8 +51,6 @@ func cd(args []string) {
 			fmt.Println("Ошибка при переходе в директорию:", err)
 			os.Exit(1)
 		}
-		// cwd, _ := os.Getwd()
-		// fmt.Println("cwd:", cwd)
 	}
 }
 
@@ -136,4 +127,14 @@ func ps() {
 
 		fmt.Printf("%-5d %-10s %s %-20s\n", p.Pid, "?", elapsed, cmd)
 	}
+}
+
+func fork(command []string) {
+	com := exec.Command(command[0], command[1:]...)
+
+	output, err := com.Output()
+	if err != nil {
+		fmt.Println("zsh: command not found:", command)
+	}
+	fmt.Println(string(output))
 }
