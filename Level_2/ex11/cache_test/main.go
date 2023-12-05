@@ -15,41 +15,31 @@ type Event struct {
 func main() {
 	// создаем событие и дату
 	summary := "Мое событие"
-	_ = summary
+
 	// дата приходит в таком формате date=2019-09-09
-	// dateString := "2023-12-31T23:59:59Z"
 	dateString := "2019-09-09"
-	parsedTime, err := time.Parse("2006-01-02", dateString) // проверка валидности даты
+
+	eventInstance, err := NewEvent(summary, dateString)
 	if err != nil {
-		fmt.Println("Ошибка при разборе даты:", err)
+		fmt.Println("Ошибка при создании мероприятия:", err)
 		return
 	}
-	fmt.Println(parsedTime)
-
-	// в качестве ключа сделать название мероприятия_2023-12-31
-	// в качестве значения структуру мероприятия
 
 	// Create a container for the cache
 	cache := memorycache.New(5*time.Minute, 10*time.Minute)
 
 	keyCache := summary + "_" + dateString
-	fmt.Println(keyCache)
-
-	eventInstance := Event{
-		Summary: summary,
-		Date:    parsedTime,
-	}
 
 	cache.Set(keyCache, eventInstance, 5*time.Minute)
 
-	//
-	value, _ := cache.Get(keyCache)
+	// addCacheDay(cache)
+	// addCacheWeek(cache)
+	// addCacheMonth(cache)
 
-	fmt.Println(value)
+	cache.PrintAll()
 }
 
 // функция которая создает новую структуру Event (конструктор)
-// ПРОТЕСТИРОВАТЬ!!!
 func NewEvent(summary, date string) (Event, error) {
 	parsedTime, err := time.Parse("2006-01-02", date)
 	if err != nil {
@@ -66,14 +56,69 @@ func NewEvent(summary, date string) (Event, error) {
 	}, nil
 }
 
-// func NewEvent(summary, date string) Event {
-// 	parsedTime, err := time.Parse("2006-01-02", date) // проверка валидности даты
-// 	if err != nil {
-// 		fmt.Println("Ошибка при разборе даты:", err)
-// 		return Event{}
-// 	}
-// 	return Event{
-// 		Summary: summary,
-// 		Date:    parsedTime,
-// 	}
-// }
+func addCacheMonth(c *memorycache.Cache) {
+	for i := 1; i <= 12; i++ {
+		month := fmt.Sprintf("%02d", i)
+		date := "2019-" + month + "-20"
+		summary := "Мое событие " + month
+
+		eventInstance, err := NewEvent(summary, date)
+		if err != nil {
+			fmt.Println("Ошибка при создании мероприятия:", err)
+			return
+		}
+
+		keyCache := getKeyCache(summary, date)
+
+		c.Set(keyCache, eventInstance, 5*time.Minute)
+	}
+}
+
+func addCacheWeek(c *memorycache.Cache) {
+	startDateStr := "2021-01-01"                            // начальная дата
+	parsedTime, _ := time.Parse("2006-01-02", startDateStr) // переводим в формат time.Time
+	// создаем дату с 1 по 12 неделю
+	for i := 1; i <= 12; i++ {
+		week := fmt.Sprintf("%02d", i)
+		date := parsedTime.AddDate(0, 0, (i-1)*7)
+		dateString := date.Format("2006-01-02") // перевод в строку
+
+		summary := "Мое событие " + week
+
+		eventInstance, err := NewEvent(summary, dateString)
+		if err != nil {
+			fmt.Println("Ошибка при создании мероприятия:", err)
+			return
+		}
+
+		keyCache := getKeyCache(summary, dateString)
+
+		c.Set(keyCache, eventInstance, 5*time.Minute)
+	}
+	// return nil
+}
+
+func addCacheDay(c *memorycache.Cache) {
+	for i := 11; i <= 22; i++ {
+		day := fmt.Sprintf("%02d", i)
+		date := "2021-" + "01-" + day
+		summary := "Мое событие " + day
+
+		eventInstance, err := NewEvent(summary, date)
+		if err != nil {
+			fmt.Println("Ошибка при создании мероприятия:", err)
+			return
+		}
+
+		keyCache := getKeyCache(summary, date)
+
+		c.Set(keyCache, eventInstance, 5*time.Minute)
+	}
+}
+
+func getKeyCache(summary, date string) string {
+	if summary != "" && date != "" {
+		return summary + "_" + date
+	}
+	return ""
+}

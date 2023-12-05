@@ -2,6 +2,7 @@ package memorycache
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 
 	"time"
@@ -90,6 +91,59 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 	}
 
 	return item.Value, true
+}
+
+// returns all cache entries
+func (c *Cache) GetAll() map[string]Item {
+	c.RLock()
+	defer c.RUnlock()
+
+	result := make(map[string]Item, len(c.items))
+
+	for key, item := range c.items {
+		// Проверяем срок годности
+		if item.Expiration > 0 && time.Now().UnixNano() > item.Expiration {
+			// Пропускаем просроченные записи
+			continue
+		}
+
+		result[key] = item
+	}
+
+	return result
+}
+
+// print all cache entries
+func (c *Cache) PrintAll() {
+	c.RLock()
+	defer c.RUnlock()
+
+	for key, item := range c.items {
+		// Проверяем срок годности
+		if item.Expiration > 0 && time.Now().UnixNano() > item.Expiration {
+			// Пропускаем просроченные записи
+			continue
+		}
+		// fmt.Println(key, item)
+		fmt.Println(key)
+	}
+}
+
+func (c *Cache) PrintDay(currentDay int) {
+	c.RLock()
+	defer c.RUnlock()
+
+	for key, item := range c.items {
+		// Проверяем срок годности
+		if item.Expiration > 0 && time.Now().UnixNano() > item.Expiration {
+			// Пропускаем просроченные записи
+			continue
+		}
+		if item.Value == Event {
+
+			fmt.Println(key)
+		}
+	}
 }
 
 // Delete cache by key
