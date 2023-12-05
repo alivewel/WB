@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	"strings"
 	"time"
 
 	"cache_test/pkg/event"
@@ -26,8 +27,14 @@ type Cache struct {
 }
 
 // Item struct cache item
+// type Item struct {
+// 	Value      interface{}
+// 	Expiration int64
+// 	Created    time.Time
+// }
+
 type Item struct {
-	Value      interface{}
+	Value      event.Event
 	Expiration int64
 	Created    time.Time
 }
@@ -75,6 +82,66 @@ func (c *Cache) Set(key string, value interface{}, duration time.Duration) {
 	}
 
 }
+
+// Set setting a cache by key
+func (c *Cache) SetEvent(Event event.Event, duration time.Duration) {
+
+	var expiration int64
+
+	if duration == 0 {
+		duration = c.defaultExpiration
+	}
+
+	if duration > 0 {
+		expiration = time.Now().Add(duration).UnixNano()
+	}
+
+	c.Lock()
+
+	defer c.Unlock()
+
+	key := GetKeyCache(Event)
+
+	fmt.Println("SetEvent", key)
+
+	c.items[key] = Item{
+		Value:      Event,
+		Expiration: expiration,
+		Created:    time.Now(),
+	}
+}
+
+// приведение к виду: summary + "_" + date
+func GetKeyCache(Event event.Event) string {
+	// Проверка наличия входных данных
+	if event.summary != "" && event.date != "" {
+		// Удаление пробелов в начале и конце строки
+		event.summary = strings.TrimSpace(event.summary)
+		event.date = strings.TrimSpace(event.date)
+
+		// Нормализация данных (приведение к нижнему регистру)
+		event.summary = strings.ToLower(event.summary)
+
+		return strings.Join([]string{event.summary, event.date}, "_")
+	}
+	return ""
+}
+
+// // приведение к виду: summary + "_" + date
+// func GetKeyCache(summary, date string) string {
+// 	// Проверка наличия входных данных
+// 	if summary != "" && date != "" {
+// 		// Удаление пробелов в начале и конце строки
+// 		summary = strings.TrimSpace(summary)
+// 		date = strings.TrimSpace(date)
+
+// 		// Нормализация данных (приведение к нижнему регистру)
+// 		summary = strings.ToLower(summary)
+
+// 		return strings.Join([]string{summary, date}, "_")
+// 	}
+// 	return ""
+// }
 
 // Get getting a cache by key
 func (c *Cache) Get(key string) (interface{}, bool) {

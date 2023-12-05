@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-
+	"strings"
 	"time"
 
-	"cache_test/pkg/event"
+	"myserver/pkg/event"
 )
 
 // // временное дублирование
@@ -24,6 +24,13 @@ type Cache struct {
 	defaultExpiration time.Duration
 	cleanupInterval   time.Duration
 }
+
+// Item struct cache item
+// type Item struct {
+// 	Value      interface{}
+// 	Expiration int64
+// 	Created    time.Time
+// }
 
 // Item struct cache item
 type Item struct {
@@ -74,6 +81,51 @@ func (c *Cache) Set(key string, value interface{}, duration time.Duration) {
 		Created:    time.Now(),
 	}
 
+}
+
+// Set setting a cache by key
+func (c *Cache) SetEvent(Event event.Event, duration time.Duration) {
+
+	var expiration int64
+
+	if duration == 0 {
+		duration = c.defaultExpiration
+	}
+
+	if duration > 0 {
+		expiration = time.Now().Add(duration).UnixNano()
+	}
+
+	c.Lock()
+
+	defer c.Unlock()
+
+	key := GetKeyCache(Event)
+
+	fmt.Println("SetEvent", key)
+
+	c.items[key] = Item{
+		Value:      Event,
+		Expiration: expiration,
+		Created:    time.Now(),
+	}
+}
+
+// приведение к виду: summary + "_" + date
+func GetKeyCache(Event event.Event) string {
+	// Проверка наличия входных данных
+	if Event.Summary != "" {
+		// Удаление пробелов в начале и конце строки
+		Event.Summary = strings.TrimSpace(Event.Summary)
+		date := Event.Date.Format("2006-01-02") 
+		// Event.Date = strings.TrimSpace(Event.Date)
+
+		// Нормализация данных (приведение к нижнему регистру)
+		Event.Summary = strings.ToLower(Event.Summary)
+
+		return strings.Join([]string{Event.Summary,date}, "_")
+	}
+	return ""
 }
 
 // Get getting a cache by key
