@@ -1,16 +1,18 @@
 package main
 
 import (
+	"cache_test/pkg/event"
 	"cache_test/pkg/memorycache"
-	"errors"
+
+	// "errors"
 	"fmt"
 	"time"
 )
 
-type Event struct {
-	Summary string    `json:"summary"`
-	Date    time.Time `json:"date"`
-}
+// type Event struct {
+// 	Summary string    `json:"summary"`
+// 	Date    time.Time `json:"date"`
+// }
 
 func main() {
 	// создаем событие и дату
@@ -19,7 +21,7 @@ func main() {
 	// дата приходит в таком формате date=2019-09-09
 	dateString := "2019-09-09"
 
-	eventInstance, err := NewEvent(summary, dateString)
+	eventInstance, err := event.NewEvent(summary, dateString)
 	if err != nil {
 		fmt.Println("Ошибка при создании мероприятия:", err)
 		return
@@ -34,27 +36,30 @@ func main() {
 
 	// addCacheDay(cache)
 	// addCacheWeek(cache)
-	// addCacheMonth(cache)
+	addCacheMonth(cache)
 
-	cache.PrintAll()
+	// cache.PrintAll()
+	// cache.PrintDay(12)
+	// cache.PrintWeek(5)
+	cache.PrintMonth(12)
 }
 
-// функция которая создает новую структуру Event (конструктор)
-func NewEvent(summary, date string) (Event, error) {
-	parsedTime, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		return Event{}, fmt.Errorf("ошибка при разборе даты: %v", err)
-	}
+// // функция которая создает новую структуру Event (конструктор)
+// func NewEvent(summary, date string) (Event, error) {
+// 	parsedTime, err := time.Parse("2006-01-02", date)
+// 	if err != nil {
+// 		return Event{}, fmt.Errorf("ошибка при разборе даты: %v", err)
+// 	}
 
-	if summary == "" || parsedTime == (time.Time{}) {
-		return Event{}, errors.New("некорректные данные для создания события")
-	}
+// 	if summary == "" || parsedTime == (time.Time{}) {
+// 		return Event{}, errors.New("некорректные данные для создания события")
+// 	}
 
-	return Event{
-		Summary: summary,
-		Date:    parsedTime,
-	}, nil
-}
+// 	return Event{
+// 		Summary: summary,
+// 		Date:    parsedTime,
+// 	}, nil
+// }
 
 func addCacheMonth(c *memorycache.Cache) {
 	for i := 1; i <= 12; i++ {
@@ -62,7 +67,7 @@ func addCacheMonth(c *memorycache.Cache) {
 		date := "2019-" + month + "-20"
 		summary := "Мое событие " + month
 
-		eventInstance, err := NewEvent(summary, date)
+		eventInstance, err := event.NewEvent(summary, date)
 		if err != nil {
 			fmt.Println("Ошибка при создании мероприятия:", err)
 			return
@@ -85,7 +90,7 @@ func addCacheWeek(c *memorycache.Cache) {
 
 		summary := "Мое событие " + week
 
-		eventInstance, err := NewEvent(summary, dateString)
+		eventInstance, err := event.NewEvent(summary, dateString)
 		if err != nil {
 			fmt.Println("Ошибка при создании мероприятия:", err)
 			return
@@ -104,7 +109,7 @@ func addCacheDay(c *memorycache.Cache) {
 		date := "2021-" + "01-" + day
 		summary := "Мое событие " + day
 
-		eventInstance, err := NewEvent(summary, date)
+		eventInstance, err := event.NewEvent(summary, date)
 		if err != nil {
 			fmt.Println("Ошибка при создании мероприятия:", err)
 			return

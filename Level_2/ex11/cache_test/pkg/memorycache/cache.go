@@ -6,7 +6,16 @@ import (
 	"sync"
 
 	"time"
+
+	"cache_test/pkg/event"
 )
+
+// // временное дублирование
+// // потом вынести в отдельный файл
+// type Event struct {
+// 	Summary string    `json:"summary"`
+// 	Date    time.Time `json:"date"`
+// }
 
 // Cache struct cache
 type Cache struct {
@@ -129,19 +138,74 @@ func (c *Cache) PrintAll() {
 	}
 }
 
-func (c *Cache) PrintDay(currentDay int) {
+func (c *Cache) PrintDay(selectDay int) {
 	c.RLock()
 	defer c.RUnlock()
 
-	for key, item := range c.items {
-		// Проверяем срок годности
-		if item.Expiration > 0 && time.Now().UnixNano() > item.Expiration {
-			// Пропускаем просроченные записи
-			continue
-		}
-		if item.Value == Event {
+	// for key, item := range c.items {
+	if selectDay >= 1 && selectDay <= 31 {
+		for _, item := range c.items {
+			// Проверяем срок годности
+			if item.Expiration > 0 && time.Now().UnixNano() > item.Expiration {
+				// Пропускаем просроченные записи
+				continue
+			}
 
-			fmt.Println(key)
+			// fmt.Printf("Item.Value type: %T\n", item.Value)
+
+			// проверка что значение кэша структура Event
+			if v, ok := item.Value.(event.Event); ok {
+				if v.Date.Day() == selectDay {
+					fmt.Printf("%q\n", v)
+				}
+			}
+		}
+	}
+}
+
+func (c *Cache) PrintWeek(selectWeek int) {
+	c.RLock()
+	defer c.RUnlock()
+
+	// for key, item := range c.items {
+	if selectWeek >= 1 && selectWeek <= 52 {
+		for _, item := range c.items {
+			// Проверяем срок годности
+			if item.Expiration > 0 && time.Now().UnixNano() > item.Expiration {
+				// Пропускаем просроченные записи
+				continue
+			}
+
+			// проверка что значение кэша структура Event
+			if v, ok := item.Value.(event.Event); ok {
+				_, currentWeek := v.Date.ISOWeek()
+				if currentWeek == selectWeek {
+					fmt.Printf("%q\n", v)
+				}
+			}
+		}
+	}
+}
+
+func (c *Cache) PrintMonth(selectMonth int) {
+	c.RLock()
+	defer c.RUnlock()
+
+	// for key, item := range c.items {
+	if selectMonth >= 1 && selectMonth <= 12 {
+		for _, item := range c.items {
+			// Проверяем срок годности
+			if item.Expiration > 0 && time.Now().UnixNano() > item.Expiration {
+				// Пропускаем просроченные записи
+				continue
+			}
+
+			// проверка что значение кэша структура Event
+			if v, ok := item.Value.(event.Event); ok {
+				if int(v.Date.Month()) == selectMonth {
+					fmt.Printf("%q\n", v)
+				}
+			}
 		}
 	}
 }
