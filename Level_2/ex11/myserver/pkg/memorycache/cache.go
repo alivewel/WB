@@ -3,19 +3,12 @@ package memorycache
 import (
 	"errors"
 	"fmt"
-	"sync"
 	"strings"
+	"sync"
 	"time"
 
 	"myserver/pkg/event"
 )
-
-// // временное дублирование
-// // потом вынести в отдельный файл
-// type Event struct {
-// 	Summary string    `json:"summary"`
-// 	Date    time.Time `json:"date"`
-// }
 
 // Cache struct cache
 type Cache struct {
@@ -24,13 +17,6 @@ type Cache struct {
 	defaultExpiration time.Duration
 	cleanupInterval   time.Duration
 }
-
-// Item struct cache item
-// type Item struct {
-// 	Value      interface{}
-// 	Expiration int64
-// 	Created    time.Time
-// }
 
 // Item struct cache item
 type Item struct {
@@ -59,7 +45,8 @@ func New(defaultExpiration, cleanupInterval time.Duration) *Cache {
 }
 
 // Set setting a cache by key
-func (c *Cache) Set(key string, value interface{}, duration time.Duration) {
+// func (c *Cache) Set(key string, value interface{}, duration time.Duration) {
+func (c *Cache) Set(key string, value event.Event, duration time.Duration) {
 
 	var expiration int64
 
@@ -84,7 +71,7 @@ func (c *Cache) Set(key string, value interface{}, duration time.Duration) {
 }
 
 // Set setting a cache by key
-func (c *Cache) SetEvent(Event event.Event, duration time.Duration) {
+func (c *Cache) AddEvent(Event event.Event, duration time.Duration) {
 
 	var expiration int64
 
@@ -117,13 +104,13 @@ func GetKeyCache(Event event.Event) string {
 	if Event.Summary != "" {
 		// Удаление пробелов в начале и конце строки
 		Event.Summary = strings.TrimSpace(Event.Summary)
-		date := Event.Date.Format("2006-01-02") 
+		date := Event.Date.Format("2006-01-02")
 		// Event.Date = strings.TrimSpace(Event.Date)
 
 		// Нормализация данных (приведение к нижнему регистру)
 		Event.Summary = strings.ToLower(Event.Summary)
 
-		return strings.Join([]string{Event.Summary,date}, "_")
+		return strings.Join([]string{Event.Summary, date}, "_")
 	}
 	return ""
 }
@@ -350,3 +337,4 @@ func (c *Cache) clearItems(keys []string) {
 		delete(c.items, k)
 	}
 }
+

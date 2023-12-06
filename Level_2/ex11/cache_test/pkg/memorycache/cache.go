@@ -11,13 +11,6 @@ import (
 	"cache_test/pkg/event"
 )
 
-// // временное дублирование
-// // потом вынести в отдельный файл
-// type Event struct {
-// 	Summary string    `json:"summary"`
-// 	Date    time.Time `json:"date"`
-// }
-
 // Cache struct cache
 type Cache struct {
 	sync.RWMutex
@@ -34,7 +27,7 @@ type Cache struct {
 // }
 
 type Item struct {
-	Value      event.Event
+	Value      event.Event // структура мероприятия
 	Expiration int64
 	Created    time.Time
 }
@@ -84,7 +77,7 @@ func (c *Cache) Set(key string, value interface{}, duration time.Duration) {
 }
 
 // Set setting a cache by key
-func (c *Cache) SetEvent(Event event.Event, duration time.Duration) {
+func (c *Cache) AddEvent(Event event.Event, duration time.Duration) {
 
 	var expiration int64
 
