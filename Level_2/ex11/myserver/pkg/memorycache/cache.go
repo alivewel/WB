@@ -89,7 +89,7 @@ func (c *Cache) AddEvent(Event event.Event, duration time.Duration) error {
 	defer c.Unlock()
 
 	key := GetKeyCache(Event)
-	if key != "" {
+	if key == "" {
 		return fmt.Errorf("Поле мероприятия пустое")
 	}
 
@@ -106,7 +106,7 @@ func (c *Cache) UpdateEvent(updatedEvent event.Event, duration time.Duration) er
 	defer c.Unlock()
 
 	key := GetKeyCache(updatedEvent)
-	if key != "" {
+	if key == "" {
 		return fmt.Errorf("Поле мероприятия пустое")
 	}
 
@@ -139,7 +139,7 @@ func (c *Cache) DeleteEvent(deletedEvent event.Event) error {
 	defer c.Unlock()
 
 	deleteKey := GetKeyCache(deletedEvent)
-	if deleteKey != "" {
+	if deleteKey == "" {
 		return fmt.Errorf("Поле мероприятия пустое")
 	}
 
