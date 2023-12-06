@@ -72,7 +72,7 @@ func (c *Cache) Set(key string, value event.Event, duration time.Duration) {
 }
 
 // Set setting a cache by key
-func (c *Cache) AddEvent(Event event.Event, duration time.Duration) {
+func (c *Cache) AddEvent(Event event.Event, duration time.Duration) error {
 
 	var expiration int64
 
@@ -89,12 +89,16 @@ func (c *Cache) AddEvent(Event event.Event, duration time.Duration) {
 	defer c.Unlock()
 
 	key := GetKeyCache(Event)
+	if key != "" {
+		return fmt.Errorf("Поле мероприятия пустое")
+	}
 
 	c.items[key] = Item{
 		Value:      Event,
 		Expiration: expiration,
 		Created:    time.Now(),
 	}
+	return nil
 }
 
 func (c *Cache) UpdateEvent(updatedEvent event.Event, duration time.Duration) error {
@@ -102,6 +106,9 @@ func (c *Cache) UpdateEvent(updatedEvent event.Event, duration time.Duration) er
 	defer c.Unlock()
 
 	key := GetKeyCache(updatedEvent)
+	if key != "" {
+		return fmt.Errorf("Поле мероприятия пустое")
+	}
 
 	if _, ok := c.items[key]; ok {
 		// Ключ существует, обновляем значение
@@ -132,6 +139,9 @@ func (c *Cache) DeleteEvent(deletedEvent event.Event) error {
 	defer c.Unlock()
 
 	deleteKey := GetKeyCache(deletedEvent)
+	if deleteKey != "" {
+		return fmt.Errorf("Поле мероприятия пустое")
+	}
 
 	if _, ok := c.items[deleteKey]; ok {
 		delete(c.items, deleteKey)
