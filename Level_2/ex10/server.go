@@ -2,59 +2,59 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"net/http"
+	"net"
+	"os"
 )
 
-type Message struct {
-	Text string `json:"text"`
+func handleConnection(conn net.Conn) {
+	defer conn.Close()
+
+	// Создаем буфер для чтения данных
+	buffer := make([]byte, 1024)
+
+	for {
+		// Читаем данные из соединения
+		n, err := conn.Read(buffer)
+		if err != nil {
+			fmt.Println("Ошибка чтения:", err)
+			return
+		}
+
+		// Выводим полученные данные
+		fmt.Printf("Получено: %s", buffer[:n])
+
+		// Отправляем ответ обратно клиенту
+		response := []byte("Сообщение получено\n")
+		conn.Write(response)
+		fmt.Printf("%s", response)
+	}
 }
 
 func main() {
-	http.HandleFunc("/", handleRequest)
-	fmt.Println("Server listening on :8081...")
-	http.ListenAndServe(":8081", nil)
-}
+	// Устанавливаем адрес и порт
+	address := "localhost"
+	port := "8080"
+	listenAddr := fmt.Sprintf("%s:%s", address, port)
 
-func handleRequest(w http.ResponseWriter, r *http.Request) {
-	// if r.Method != http.MethodPost {
-	// 	http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-	// 	return
-	// }
-
-	// Читаем тело запроса
-	body, err := io.ReadAll(r.Body)
+	// Слушаем порт
+	listener, err := net.Listen("tcp", listenAddr)
 	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusInternalServerError)
-		return
+		fmt.Println("Ошибка прослушивания порта:", err)
+		os.Exit(1)
 	}
+	defer listener.Close()
 
-	// Преобразуем байтовый массив в строку
-	message := string(body)
+	fmt.Printf("Сервер слушает на %s\n", listenAddr)
 
-	fmt.Println("Received message:", message)
+	for {
+		// Принимаем входящее соединение
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("Ошибка при принятии соединения:", err)
+			continue
+		}
 
-	response := "Message received successfully\n"
-	io.WriteString(w, response)
+		// Запускаем обработку соединения в отдельной горутине
+		go handleConnection(conn)
+	}
 }
-
-// func handleRequest(w http.ResponseWriter, r *http.Request) {
-// 	if r.Method != http.MethodPost {
-// 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-// 		return
-// 	}
-
-// 	var message Message
-// 	decoder := json.NewDecoder(r.Body)
-// 	err := decoder.Decode(&message)
-// 	if err != nil {
-// 		http.Error(w, "Error decoding JSON", http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	fmt.Println("Received message:", message.Text)
-
-// 	response := "Message received successfully\n"
-// 	io.WriteString(w, response)
-// }
-
