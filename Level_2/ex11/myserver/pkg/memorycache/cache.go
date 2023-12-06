@@ -90,13 +90,55 @@ func (c *Cache) AddEvent(Event event.Event, duration time.Duration) {
 
 	key := GetKeyCache(Event)
 
-	fmt.Println("SetEvent", key)
-
 	c.items[key] = Item{
 		Value:      Event,
 		Expiration: expiration,
 		Created:    time.Now(),
 	}
+}
+
+func (c *Cache) UpdateEvent(updatedEvent event.Event, duration time.Duration) error {
+	c.Lock()
+	defer c.Unlock()
+
+	key := GetKeyCache(updatedEvent)
+
+	if _, ok := c.items[key]; ok {
+		// Ключ существует, обновляем значение
+		var expiration int64
+
+		if duration == 0 {
+			duration = c.defaultExpiration
+		}
+
+		if duration > 0 {
+			expiration = time.Now().Add(duration).UnixNano()
+		}
+
+		c.items[key] = Item{
+			Value:      updatedEvent,
+			Expiration: expiration,
+			Created:    time.Now(),
+		}
+		return nil
+	}
+
+	// Ключ не существует, возвращаем ошибку
+	return fmt.Errorf("Ключ %s не найден в кэше", key)
+}
+
+func (c *Cache) DeleteEvent(deletedEvent event.Event) error {
+	c.Lock()
+	defer c.Unlock()
+
+	deleteKey := GetKeyCache(deletedEvent)
+
+	if _, ok := c.items[deleteKey]; ok {
+		delete(c.items, deleteKey)
+		return nil
+	}
+
+	return fmt.Errorf("Ключ %s не найден в кэше", deleteKey)
 }
 
 // приведение к виду: summary + "_" + date
@@ -240,7 +282,7 @@ func (c *Cache) GetFilterEventsByWeek(selectWeek int) (string, error) {
 
 		return string(jsonData), nil
 	}
-	return "", fmt.Errorf("Недопустимая неделя: %d, выход за пределы допустимого диапазона [1, 12]", selectWeek)
+	return "", fmt.Errorf("Недопустимая неделя: %d, выход за пределы допустимого диапазона [1, 52]", selectWeek)
 }
 
 func (c *Cache) GetFilterEventsByMonth(selectMonth int) (string, error) {

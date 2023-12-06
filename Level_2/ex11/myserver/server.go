@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"myserver/pkg/event"
 	"myserver/pkg/handlers"
 	"myserver/pkg/memorycache"
@@ -13,12 +14,21 @@ import (
 	"time"
 )
 
+// POST /create_event
+// POST /update_event
+// POST /delete_event
+// GET /events_for_day
+// GET /events_for_week
+// GET /events_for_month
+
 func main() {
 	// Create a container for the cache
 	cache := memorycache.New(5*time.Minute, 10*time.Minute)
 
-	http.HandleFunc("/create-event", logRequestMiddleware(createEventHandler(cache)))
-	http.HandleFunc("/get-events", logRequestMiddleware(getEventsHandler(cache)))
+	http.HandleFunc("/create-event", logRequestMiddleware(СreateEventHandler(cache)))
+	http.HandleFunc("/events_for_day", logRequestMiddleware(GetEventsDayHandler(cache)))
+	http.HandleFunc("/events_for_week", logRequestMiddleware(GetEventsWeekHandler(cache)))
+	http.HandleFunc("/events_for_month", logRequestMiddleware(GetEventsMonthHandler(cache)))
 
 	// Указываем порт для прослушивания
 	port := 8080
@@ -31,71 +41,201 @@ func main() {
 	}
 }
 
-func createEventHandler(cache *memorycache.Cache) http.HandlerFunc {
+// curl -X POST -H "Content-Type: application/json" -d '{"summary":"Мое событие","date":"2023-12-31T23:59:59Z"}' http://localhost:8080/create-event
+func СreateEventHandler(cache *memorycache.Cache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
+		if r.Method != http.MethodPost {
+			log.Println("Метод не поддерживается")
+			response := handlers.Response{Error: "Метод не поддерживается"}
+			handlers.SendJSONResponse(w, http.StatusInternalServerError, response)
+		} else {
 			// Обработка запроса на создание события
 			var eventData event.Event
 			err := json.NewDecoder(r.Body).Decode(&eventData)
 			if err != nil {
-				http.Error(w, "Ошибка разбора JSON", http.StatusBadRequest)
-				return
+				log.Println("Ошибка разбора JSON")
+				response := handlers.Response{Error: "Ошибка разбора JSON"}
+				handlers.SendJSONResponse(w, http.StatusInternalServerError, response)
 			}
 
 			cache.AddEvent(eventData, 5*time.Minute)
 
-			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, "Событие успешно добавлено.")
-		} else {
-			http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+			// Преобразование тела запроса в строку
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				log.Println("Ошибка чтения тела запроса")
+				response := handlers.Response{Error: "Ошибка чтения тела запроса"}
+				handlers.SendJSONResponse(w, http.StatusInternalServerError, response)
+			}
+			requestData := string(body)
+
+			log.Printf("Событие успешно добавлено: %+v", eventData)
+
+			response := handlers.Response{Result: requestData}
+			handlers.SendJSONResponse(w, http.StatusOK, response)
 		}
 	}
 }
 
-// curl -X POST -H "Content-Type: application/json" -d '{"summary":"Мое событие","date":"2023-12-31T23:59:59Z"}' http://localhost:8080/create-event
-
-func getEventsHandler(cache *memorycache.Cache) http.HandlerFunc {
+func UpdateEventHandler(cache *memorycache.Cache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Обработка запроса на получение всех событий
-		summary := r.URL.Query().Get("summary")
-		fmt.Println(summary)
+		if r.Method != http.MethodPost {
+			log.Println("Метод не поддерживается")
+			response := handlers.Response{Error: "Метод не поддерживается"}
+			handlers.SendJSONResponse(w, http.StatusInternalServerError, response)
+		} else {
+			// Обработка запроса на создание события
+			var eventData event.Event
+			err := json.NewDecoder(r.Body).Decode(&eventData)
+			if err != nil {
+				log.Println("Ошибка разбора JSON")
+				response := handlers.Response{Error: "Ошибка разбора JSON"}
+				handlers.SendJSONResponse(w, http.StatusInternalServerError, response)
+			}
 
-		days := r.URL.Query().Get("days")
-		fmt.Println(days)
+			err = cache.UpdateEvent(eventData, 5*time.Minute)
+			if err != nil {
+				log.Println(err.Error())
+				response := handlers.Response{Error: err.Error()}
+				handlers.SendJSONResponse(w, http.StatusInternalServerError, response)
+			}
 
-		daysInt, err := strconv.Atoi(days)
+			// Преобразование тела запроса в строку
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				log.Println("Ошибка чтения тела запроса")
+				response := handlers.Response{Error: "Ошибка чтения тела запроса"}
+				handlers.SendJSONResponse(w, http.StatusInternalServerError, response)
+			}
+			requestData := string(body)
+
+			log.Printf("Событие успешно обновлено: %+v", eventData)
+
+			response := handlers.Response{Result: requestData}
+			handlers.SendJSONResponse(w, http.StatusOK, response)
+		}
+	}
+}
+
+func DeleteEventHandler(cache *memorycache.Cache) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			log.Println("Метод не поддерживается")
+			response := handlers.Response{Error: "Метод не поддерживается"}
+			handlers.SendJSONResponse(w, http.StatusInternalServerError, response)
+		} else {
+			// Обработка запроса на создание события
+			var eventData event.Event
+			err := json.NewDecoder(r.Body).Decode(&eventData)
+			if err != nil {
+				log.Println("Ошибка разбора JSON")
+				response := handlers.Response{Error: "Ошибка разбора JSON"}
+				handlers.SendJSONResponse(w, http.StatusInternalServerError, response)
+			}
+
+			err = cache.DeleteEvent(eventData)
+			if err != nil {
+				log.Println(err.Error())
+				response := handlers.Response{Error: err.Error()}
+				handlers.SendJSONResponse(w, http.StatusInternalServerError, response)
+			}
+
+			// Преобразование тела запроса в строку
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				log.Println("Ошибка чтения тела запроса")
+				response := handlers.Response{Error: "Ошибка чтения тела запроса"}
+				handlers.SendJSONResponse(w, http.StatusInternalServerError, response)
+			}
+			requestData := string(body)
+
+			log.Printf("Событие успешно удалено: %+v", eventData)
+
+			response := handlers.Response{Result: requestData}
+			handlers.SendJSONResponse(w, http.StatusOK, response)
+		}
+	}
+}
+
+
+// curl "http://localhost:8080/events_for_day?day=12"
+// Обработка запроса на получение с выбранного дня
+func GetEventsDayHandler(cache *memorycache.Cache) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		day := r.URL.Query().Get("day")
+
+		dayInt, err := strconv.Atoi(day)
 		if err != nil {
-			// Обработка ошибки, если преобразование не удалось
-			http.Error(w, "Ошибка преобразования строки в число", http.StatusBadRequest)
+			response := handlers.Response{Error: "Ошибка преобразования строки в число"}
+			handlers.SendJSONResponse(w, http.StatusBadRequest, response)
 			return
 		}
 
-		addCacheDay(cache)
-
-		selectDay, err := cache.GetFilterEventsByDay(daysInt)
+		selectDay, err := cache.GetFilterEventsByDay(dayInt)
 		if err != nil {
-			http.Error(w, "Ошибка парсинга URL запроса", http.StatusBadRequest)
+			response := handlers.Response{Error: "Ошибка парсинга URL запроса"}
+			handlers.SendJSONResponse(w, http.StatusServiceUnavailable, response)
 			return
 		}
-		fmt.Println(selectDay)
-		// считать данные с доменного запроса
-		// отправить запрос в БД
-		// получить данные и вывести их на экран
-
-		// cache.PrintAll()
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		// w.Write("Мир!")
 
 		response := handlers.Response{Result: selectDay}
 		handlers.SendJSONResponse(w, http.StatusOK, response)
 	}
 }
 
+// curl "http://localhost:8080/events_for_week?week=5"
+// Обработка запроса на получение с выбранной недели
+func GetEventsWeekHandler(cache *memorycache.Cache) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		week := r.URL.Query().Get("week")
+
+		weekInt, err := strconv.Atoi(week)
+		if err != nil {
+			response := handlers.Response{Error: "Ошибка преобразования строки в число"}
+			handlers.SendJSONResponse(w, http.StatusBadRequest, response)
+			return
+		}
+
+		selectWeek, err := cache.GetFilterEventsByDay(weekInt)
+		if err != nil {
+			response := handlers.Response{Error: "Ошибка парсинга URL запроса"}
+			handlers.SendJSONResponse(w, http.StatusServiceUnavailable, response)
+			return
+		}
+
+		response := handlers.Response{Result: selectWeek}
+		handlers.SendJSONResponse(w, http.StatusOK, response)
+	}
+}
+
+// curl "http://localhost:8080/events_for_month?month=5"
+// Обработка запроса на получение с выбранного месяца
+func GetEventsMonthHandler(cache *memorycache.Cache) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		month := r.URL.Query().Get("month")
+
+		monthInt, err := strconv.Atoi(month)
+		if err != nil {
+			response := handlers.Response{Error: "Ошибка преобразования строки в число"}
+			handlers.SendJSONResponse(w, http.StatusBadRequest, response)
+			return
+		}
+
+		selectMonth, err := cache.GetFilterEventsByDay(monthInt)
+		if err != nil {
+			response := handlers.Response{Error: "Ошибка парсинга URL запроса"}
+			handlers.SendJSONResponse(w, http.StatusServiceUnavailable, response)
+			return
+		}
+
+		response := handlers.Response{Result: selectMonth}
+		handlers.SendJSONResponse(w, http.StatusOK, response)
+	}
+}
+
 // curl http://localhost:8080/get-events
 // curl "http://localhost:8080/get-events?summary=Мое%20событие"
-// curl "http://localhost:8080/get-events?days=12"
+// curl "http://localhost:8080/get-events?day=12"
 
 func logRequestMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
