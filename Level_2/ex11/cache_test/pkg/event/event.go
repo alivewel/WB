@@ -3,8 +3,6 @@ package event
 import (
 	"errors"
 	"fmt"
-	// "sync"
-
 	"time"
 )
 

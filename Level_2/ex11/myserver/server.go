@@ -2,6 +2,7 @@ package main
 
 import (
 	"myserver/pkg/event"
+	"myserver/pkg/handlers"
 	"myserver/pkg/memorycache"
 	"strconv"
 
@@ -86,6 +87,9 @@ func getEventsHandler(cache *memorycache.Cache) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		// w.Write("Мир!")
+
+		response := handlers.Response{Result: selectDay}
+		handlers.SendJSONResponse(w, http.StatusOK, response)
 	}
 }
 

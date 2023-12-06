@@ -1,6 +1,7 @@
 package memorycache
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -178,7 +179,7 @@ func (c *Cache) PrintAll() {
 }
 
 // возвращать ошибку выход за границы диапозона
-func (c *Cache) GetFilterEventsByDay(selectDay int) ([]event.Event, error) {
+func (c *Cache) GetFilterEventsByDay(selectDay int) (string, error) {
 	c.RLock()
 	defer c.RUnlock()
 
@@ -191,26 +192,29 @@ func (c *Cache) GetFilterEventsByDay(selectDay int) ([]event.Event, error) {
 				continue
 			}
 
-			// fmt.Printf("Item.Value type: %T\n", item.Value)
-
 			// проверка что значение кэша структура Event
 			if v, ok := item.Value.(event.Event); ok {
 				if v.Date.Day() == selectDay {
 					eventData = append(eventData, v)
-					// fmt.Printf("%q\n", v)
 				}
 			}
 		}
-		return eventData, nil
+		// Преобразование среза в JSON-строку
+		jsonData, err := json.Marshal(eventData)
+		if err != nil {
+			return "", fmt.Errorf("Ошибка при маршалинге JSON: %v", err)
+		}
+
+		return string(jsonData), nil
 	}
-	return nil, fmt.Errorf("Недопустимый день: %d, выход за пределы допустимого диапазона [1, 12]", selectDay)
+
+	return "", fmt.Errorf("Недопустимый день: %d, выход за пределы допустимого диапазона [1, 31]", selectDay)
 }
 
-func (c *Cache) GetFilterEventsByWeek(selectWeek int) ([]event.Event, error) {
+func (c *Cache) GetFilterEventsByWeek(selectWeek int) (string, error) {
 	c.RLock()
 	defer c.RUnlock()
 
-	// for key, item := range c.items {
 	if selectWeek >= 1 && selectWeek <= 52 {
 		var eventData []event.Event
 		for _, item := range c.items {
@@ -225,20 +229,24 @@ func (c *Cache) GetFilterEventsByWeek(selectWeek int) ([]event.Event, error) {
 				_, currentWeek := v.Date.ISOWeek()
 				if currentWeek == selectWeek {
 					eventData = append(eventData, v)
-					fmt.Printf("%q\n", v)
 				}
 			}
 		}
-		return eventData, nil
+		// Преобразование среза в JSON-строку
+		jsonData, err := json.Marshal(eventData)
+		if err != nil {
+			return "", fmt.Errorf("Ошибка при маршалинге JSON: %v", err)
+		}
+
+		return string(jsonData), nil
 	}
-	return nil, fmt.Errorf("Недопустимая неделя: %d, выход за пределы допустимого диапазона [1, 12]", selectWeek)
+	return "", fmt.Errorf("Недопустимая неделя: %d, выход за пределы допустимого диапазона [1, 12]", selectWeek)
 }
 
-func (c *Cache) GetFilterEventsByMonth(selectMonth int) ([]event.Event, error) {
+func (c *Cache) GetFilterEventsByMonth(selectMonth int) (string, error) {
 	c.RLock()
 	defer c.RUnlock()
 
-	// for key, item := range c.items {
 	if selectMonth >= 1 && selectMonth <= 12 {
 		var eventData []event.Event
 		for _, item := range c.items {
@@ -252,13 +260,18 @@ func (c *Cache) GetFilterEventsByMonth(selectMonth int) ([]event.Event, error) {
 			if v, ok := item.Value.(event.Event); ok {
 				if int(v.Date.Month()) == selectMonth {
 					eventData = append(eventData, v)
-					fmt.Printf("%q\n", v)
 				}
 			}
 		}
-		return eventData, nil
+		// Преобразование среза в JSON-строку
+		jsonData, err := json.Marshal(eventData)
+		if err != nil {
+			return "", fmt.Errorf("Ошибка при маршалинге JSON: %v", err)
+		}
+
+		return string(jsonData), nil
 	}
-	return nil, fmt.Errorf("Недопустимый месяц: %d, выход за пределы допустимого диапазона [1, 12]", selectMonth)
+	return "", fmt.Errorf("Недопустимый месяц: %d, выход за пределы допустимого диапазона [1, 12]", selectMonth)
 }
 
 // Delete cache by key
@@ -337,4 +350,3 @@ func (c *Cache) clearItems(keys []string) {
 		delete(c.items, k)
 	}
 }
-
