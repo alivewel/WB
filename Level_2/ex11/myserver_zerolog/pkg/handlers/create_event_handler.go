@@ -21,7 +21,7 @@ func СreateEventHandler(cache *memorycache.Cache, logger zerolog.Logger) http.H
 		if r.Method != http.MethodPost {
 			logger.Warn().Msg("Метод не поддерживается")
 			response := Response{Error: "Метод не поддерживается"}
-			SendJSONResponse(w, http.StatusInternalServerError, response)
+			SendJSONResponse(w, http.StatusInternalServerError, response, logger)
 		} else {
 			// Обработка запроса на создание события
 			var eventData event.Event
@@ -29,7 +29,7 @@ func СreateEventHandler(cache *memorycache.Cache, logger zerolog.Logger) http.H
 			if err != nil {
 				logger.Warn().Msg("Ошибка разбора JSON")
 				response := Response{Error: "Ошибка разбора JSON"}
-				SendJSONResponse(w, http.StatusInternalServerError, response)
+				SendJSONResponse(w, http.StatusInternalServerError, response, logger)
 				return
 			}
 
@@ -41,7 +41,7 @@ func СreateEventHandler(cache *memorycache.Cache, logger zerolog.Logger) http.H
 			if err != nil {
 				logger.Warn().Msgf("Ошибка разбора JSON: %v", err)
 				response := Response{Error: "Ошибка разбора JSON"}
-				SendJSONResponse(w, http.StatusInternalServerError, response)
+				SendJSONResponse(w, http.StatusInternalServerError, response, logger)
 				return
 			}
 
@@ -50,7 +50,7 @@ func СreateEventHandler(cache *memorycache.Cache, logger zerolog.Logger) http.H
 			if err != nil {
 				logger.Warn().Msgf("Событие в кэш добавить не удалось: %v", err)
 				response := Response{Error: err.Error()}
-				SendJSONResponse(w, http.StatusInternalServerError, response)
+				SendJSONResponse(w, http.StatusInternalServerError, response, logger)
 				return
 			}
 
@@ -59,7 +59,7 @@ func СreateEventHandler(cache *memorycache.Cache, logger zerolog.Logger) http.H
 
 			logger.Info().Msg("Событие успешно добавлено!")
 			response := Response{Result: requestData}
-			SendJSONResponse(w, http.StatusOK, response)
+			SendJSONResponse(w, http.StatusOK, response, logger)
 		}
 	}
 }

@@ -22,23 +22,23 @@ func main() {
 	zero_logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 
 	http.HandleFunc("/create-event", logger.LogRequestMiddleware(handlers.СreateEventHandler(cache, zero_logger), zero_logger))
-	// http.HandleFunc("/create-event", handlers.СreateEventHandler(cache, zero_logger))
-	// http.HandleFunc("/update_event", logger.LogRequestMiddleware(handlers.UpdateEventHandler(cache)))
-	// http.HandleFunc("/delete_event", logger.LogRequestMiddleware(handlers.DeleteEventHandler(cache)))
-	// http.HandleFunc("/events_for_day", logger.LogRequestMiddleware(handlers.GetEventsDayHandler(cache)))
-	// http.HandleFunc("/events_for_week", logger.LogRequestMiddleware(handlers.GetEventsWeekHandler(cache)))
-	// http.HandleFunc("/events_for_month", logger.LogRequestMiddleware(handlers.GetEventsMonthHandler(cache)))
+	http.HandleFunc("/update_event", logger.LogRequestMiddleware(handlers.UpdateEventHandler(cache, zero_logger), zero_logger))
+	http.HandleFunc("/delete_event", logger.LogRequestMiddleware(handlers.DeleteEventHandler(cache, zero_logger), zero_logger))
+	http.HandleFunc("/events_for_day", logger.LogRequestMiddleware(handlers.GetEventsDayHandler(cache, zero_logger), zero_logger))
+	http.HandleFunc("/events_for_week", logger.LogRequestMiddleware(handlers.GetEventsWeekHandler(cache, zero_logger), zero_logger))
+	http.HandleFunc("/events_for_month", logger.LogRequestMiddleware(handlers.GetEventsMonthHandler(cache, zero_logger), zero_logger))
 
 	// Указываем порт для прослушивания
 	port := flag.Int("port", 8080, "Порт для прослушивания")
 	flag.Parse()
 
-	fmt.Printf("Сервер запущен на порту %d...\n", *port)
+	// fmt.Printf("Сервер запущен на порту %d...\n", *port)
+	zero_logger.Info().Msgf("Сервер запущен на порту %d...\n", *port)
 
 	// Запуск сервера
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 	if err != nil {
-		fmt.Println("Ошибка запуска сервера:", err)
+		zero_logger.Warn().Msgf("Ошибка запуска сервера:", err)
 	}
 }
 
