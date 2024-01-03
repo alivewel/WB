@@ -22,7 +22,7 @@ func GetEventsMonthHandler(cache *memorycache.Cache, logger zerolog.Logger) http
 			return
 		}
 
-		selectMonth, err := cache.GetFilterEventsByDay(monthInt)
+		selectMonth, err := cache.GetFilterEventsByMonth(monthInt)
 		if err != nil {
 			response := Response{Error: "Ошибка парсинга URL запроса"}
 			SendJSONResponse(w, http.StatusServiceUnavailable, response, logger)

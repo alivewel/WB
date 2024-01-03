@@ -22,7 +22,7 @@ func GetEventsWeekHandler(cache *memorycache.Cache, logger zerolog.Logger) http.
 			return
 		}
 
-		selectWeek, err := cache.GetFilterEventsByDay(weekInt)
+		selectWeek, err := cache.GetFilterEventsByWeek(weekInt)
 		if err != nil {
 			response := Response{Error: "Ошибка парсинга URL запроса"}
 			SendJSONResponse(w, http.StatusServiceUnavailable, response, logger)

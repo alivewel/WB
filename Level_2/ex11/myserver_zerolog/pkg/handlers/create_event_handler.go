@@ -15,12 +15,13 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// curl -X POST -H "Content-Type: application/json" -d '{"summary":"Мое событие","date":"2023-12-31T23:59:59Z"}' http://localhost:8080/create-event
+// curl -X POST -H "Content-Type: application/json" -d '{"summary":"Мое событие","date":"2023-12-31T23:59:59Z"}' http://localhost:8080/create_event
 func СreateEventHandler(cache *memorycache.Cache, logger zerolog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			logger.Warn().Msg("Метод не поддерживается")
-			response := Response{Error: "Метод не поддерживается"}
+			messageError := "Метод не поддерживается"
+			logger.Warn().Msg(messageError)
+			response := Response{Error: messageError}
 			SendJSONResponse(w, http.StatusInternalServerError, response, logger)
 		} else {
 			// Обработка запроса на создание события
